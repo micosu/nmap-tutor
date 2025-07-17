@@ -94,7 +94,7 @@ class NetworkItem:
     def add_to_map(self, network: 'Network', graph: 'pgv.AGraph', pos: tuple, dir: str ="right"):
         offset = self.offset[len(self.children)]
         dir_offset = self.directions[dir][len(self.same)]
-        print(f"Node {self.name} at position {pos} with connections: {self.connections}")
+        # print(f"Node {self.name} at position {pos} with connections: {self.connections}")
 
         for i, connection in enumerate(self.above):
             (hier, labels) = self.connections[connection]
@@ -115,7 +115,7 @@ class NetworkItem:
         for connection in self.neighbors:
             (hier, labels) = self.connections[connection]
             if self.name not in ["Internet"]:
-                print(f"adding edge between {self.name} and {connection.name}")
+                # print(f"adding edge between {self.name} and {connection.name}")
                 graph.add_edge(self.connector_node.name, connection.connector_node.name, taillabel = labels[0], headlabel=labels[1])
             connection.add_edges(network, graph)
 
@@ -211,6 +211,7 @@ class NetworkDevice(NetworkItem):
         
         if self.device_type not in self.DEVICE_DEFAULTS:
             print(f"Warning: Unknown device type '{self.device_type}'. Using defaults.")
+        
     
     @property
     def graphviz_label(self) -> str:
@@ -281,7 +282,7 @@ class Cluster(NetworkItem):
     def get_neighbors(self) -> List['NetworkItem']:
         """Get all devices that share an edge"""
         return [neighbor for neighbor in self.connections]
-
+    
     @property
     def graphviz_label(self) -> Optional[str]:
         """DRY - single place that defines how labels look"""
@@ -447,7 +448,6 @@ class Network:
         # IP address -> device_type, ip_type
         network_ips: list[dict] = []
         for item in self.items.values():
-            ip_info = dict()
             if item.ip:
                 network_ips.append({
                     'ip_address': item.ip,

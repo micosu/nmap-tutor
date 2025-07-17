@@ -55,19 +55,33 @@ def generate_single_network_options(network, original_cidr):
     broadcast_ip = network.broadcast_address
     options.append(f"{network_ip}-{broadcast_ip}")
     
-    # 3. Short range (network_ip-last_octet) - works for any subnet size
+    # 3. Short range (network_ip-last_octet)
     last_octet = int(str(broadcast_ip).split('.')[-1])
     options.append(f"{network_ip}-{last_octet}")
     
-    # 4. Wildcard notation (only when subnet covers entire last octet)
-    if network.prefixlen % 8 == 0 and network.prefixlen < 32:
-        octets = str(network_ip).split('.')
-        wildcards_needed = (32 - network.prefixlen) // 8
-        if wildcards_needed > 0:
-            wildcard = '.'.join(octets[:4-wildcards_needed] + ['*'] * wildcards_needed)
-            options.append(wildcard)
+    # 4. Wildcard notation based on prefix
+    # wildcard = generate_wildcard_for_prefix(network)
+    # if wildcard:
+    #     options.append(wildcard)
     
     return options
+
+def generate_wildcard_for_prefix(network):
+    """Generate wildcard notation for networks with even prefixes"""
+    octets = str(network.network_address).split('.')
+    
+    if network.prefixlen == 8:      # /8: a.*.*.*
+        return f"{octets[0]}.*.*.*"
+    elif network.prefixlen == 12:   # /12: a.b.*.*  (but only if b is on 16-boundary)
+        # Check if second octet is on a /12 boundary (multiples of 16)
+        if int(octets[1]) % 16 == 0:
+            return f"{octets[0]}.{octets[1]}.*.*"
+    elif network.prefixlen == 16:   # /16: a.b.*.*
+        return f"{octets[0]}.{octets[1]}.*.*"
+    elif network.prefixlen == 24:   # /24: a.b.c.*
+        return f"{octets[0]}.{octets[1]}.{octets[2]}.*"
+    
+    return None
 
 def generate_group_options(group_networks, group_indices, original_cidrs):
     """Generate all possible ways to represent a group of networks"""
@@ -137,7 +151,7 @@ def are_consecutive_subnets(net1, net2):
     return net2.network_address == expected_next
 
 def generate_octet_range_for_networks(networks):
-    """Generate octet range for consecutive networks with same prefix"""
+    """Generate octet range for consecutive networks with even prefixes"""
     if not networks:
         return None
     
@@ -146,29 +160,37 @@ def generate_octet_range_for_networks(networks):
         return None
     
     prefix_len = networks[0].prefixlen
-    
-    # Only generate octet ranges for certain common prefix lengths
-    if prefix_len not in [24, 25, 26, 27, 28]:
-        return None
-    
     sorted_nets = sorted(networks, key=lambda x: x.network_address)
     first_addr = str(sorted_nets[0].network_address).split('.')
-    last_addr = str(sorted_nets[-1].broadcast_address).split('.')
+    last_addr = str(sorted_nets[-1].network_address).split('.')
     
-    # For /24 networks, vary the third octet
-    if prefix_len == 24:
+    if prefix_len == 8:    # /8: vary first octet
+        first_octet = int(first_addr[0])
+        last_octet = int(last_addr[0])
+        return f"{first_octet}-{last_octet}.0.0.0-255.255.255"
+    
+    elif prefix_len == 12:  # /12: vary second octet in chunks of 16
+        first_second = int(first_addr[1])
+        last_second = int(last_addr[1])
+        return f"{first_addr[0]}.{first_second}-{last_second}.0.0-255.255"
+    
+    elif prefix_len == 16:  # /16: vary second octet
+        first_second = int(first_addr[1])
+        last_second = int(last_addr[1])
+        return f"{first_addr[0]}.{first_second}-{last_second}.0.0-255.255"
+    
+    elif prefix_len == 24:  # /24: vary third octet
         first_third = int(first_addr[2])
         last_third = int(last_addr[2])
         return f"{first_addr[0]}.{first_addr[1]}.{first_third}-{last_third}.0-255"
     
-    # For other prefixes, vary the appropriate octet
-    # This is a simplified approach - could be expanded for more cases
     return None
 
-# Example usage
-cidrs = ['10.2.3.0/27']
-all_options = generate_all_nmap_options(cidrs)
+if __name__ == "__main__":
+    # Example usage
+    cidrs = ['10.2.3.0/24', '10.2.4.0/24', '10.2.7.0/24']
+    all_options = generate_all_nmap_options(cidrs)
 
-print(f"Generated {len(all_options)} total options:")
-for i, option in enumerate(all_options, 1):
-    print(f"{i:2d}. nmap {option}")
+    print(f"Generated {len(all_options)} total options:")
+    for i, option in enumerate(all_options, 1):
+        print(f"{i:2d}. nmap {option}")

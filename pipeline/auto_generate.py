@@ -1,7 +1,9 @@
 from netaddr import IPNetwork
 from typing import Optional, List, Dict, Any
 import random
+import json
 from network import Network
+from ip_handling import generate_all_nmap_options
 
 from netaddr import IPNetwork
 import random
@@ -70,6 +72,48 @@ def generate_random_cidrs(subnets: int = 2, neighbors: bool = True) -> list[IPNe
     return cidrs
 
 
+def get_baseline_dict(item_type, name, **kwargs):
+    baseline = {
+        "type": item_type,
+        'name': name,
+    }
+    ip = kwargs.get("ip")
+    if ip:
+        baseline["ip"] = ip
+    # {'type': 'cluster', 'name': f'switch_cluster{i}', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': f'Switch{i}', 'device_type': 'Switch'},]},
+    if item_type == "device":
+        device_type = kwargs.get("device_type")
+        assert(device_type)
+        baseline.update({
+            'device_type': device_type,  
+            "Latency": str(round(random.uniform(0.01, 0.1), 3)),
+            "PortsClosed": "",
+            "PortsFiltered": "", 
+        })
+        
+        display_name = kwargs.get('display_name')
+        if display_name:
+            baseline["display_name"] = display_name
+        if device_type == "Workstation":
+            baseline["PortsOpen"] = "22 53 80 139 443 445"
+        elif device_type == "Firewall":
+            baseline["PortsOpen"] = "22 53 80 123 389 443"
+        elif device_type in ["Switch", "DomainController"]:
+            baseline["PortsOpen"] = "22 53 80 88 135 139 389 443 445 464" 
+        else:
+            baseline["PortsOpen"] = "22 53 80 443" 
+    else:
+        cluster_type = kwargs.get("cluster_type")
+        assert(cluster_type)
+        nodes = kwargs.get("nodes")
+        assert(nodes)
+        baseline.update({
+            'cluster_type': cluster_type,
+            'nodes': nodes
+        })
+
+    return baseline
+
 def generate_network_config(problem_type: str, cidr_blocks: list['IPNetwork']) -> tuple[list, dict]:
     """
     Generate a list of CIDR blocks in a private range.
@@ -81,11 +125,11 @@ def generate_network_config(problem_type: str, cidr_blocks: list['IPNetwork']) -
     Returns:
         tuple[list, dict]: list of dictionaries of devices in the network, and dictionary of connections between these devices
     """
-    # {'type': 'cluster', 'name': 'Office', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'DomainController', 'device_type': 'Controller', 'ip': '172.16.9.10', 'display_name': 'Domain Controller'}], 'ip': '172.16.0.0/12'},
+
     config = [
-        {'type': 'device', 'name': 'Internet', 'device_type': 'Internet'},
-        {'type': 'device', 'name': 'BorderRouter', 'device_type': 'Router'},
-        {'type': 'device', 'name': 'UserLocation', 'device_type': 'User', 'display_name': 'You are connected here'}
+        get_baseline_dict(item_type="device", device_type="Internet", name="Internet"),
+        get_baseline_dict(item_type="device", device_type="Router", name="BorderRouter"),
+        get_baseline_dict(item_type="device", device_type="User", name="UserLocation", display_name="You are connected here"),
     ]
 
     connections: dict[str, list[tuple]] = {
@@ -96,9 +140,11 @@ def generate_network_config(problem_type: str, cidr_blocks: list['IPNetwork']) -
     for i in range(len(cidr_blocks)):
         net = cidr_blocks[i]
         config = config + [
-            {'type': 'device', 'name': f'Firewall{i}', 'device_type': 'Firewall'},
-            {'type': 'cluster', 'name': f'switch_cluster{i}', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': f'Switch{i}', 'device_type': 'Switch'},]},
-            {'type': 'cluster', 'name': f'Office{i}', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': f'DomainController{i}', 'device_type': 'Controller', 'ip': f'{net[10]}', 'display_name': 'Domain Controller'}], 'ip': str(net)},
+            get_baseline_dict(item_type="device", device_type="Firewall", name=f'Firewall{i}'),
+            get_baseline_dict(item_type = "cluster", name=f'switch_cluster{i}', cluster_type='intermediate', 
+                              nodes= [get_baseline_dict(item_type="device", name=f'Switch{i}', device_type= 'Switch')]),
+            get_baseline_dict(item_type = "cluster", name=f'Office{i}', cluster_type='intermediate', ip= str(net),
+                              nodes= [get_baseline_dict(item_type="device", name= f'DomainController{i}', device_type="Controller", ip= f'{net[10]}', display_name= 'Domain Controller')])
             ]
         
         connections.setdefault("BorderRouter", []).append((f"Firewall{i}", "child", (f"  {net[1]}  ", f"  {net[3]}  ")))
@@ -112,8 +158,9 @@ def generate_network_config(problem_type: str, cidr_blocks: list['IPNetwork']) -
         offset = random.randint(40, 100)
         for j in range(1,random.randint(2, 4)):
             ip_address = net[offset+j]
-            config.append({'type': 'cluster', 'name': f'ClusterWorkstation{j}', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': f'Workstation{j}', 'device_type': 'Workstation', 'ip': f'{ip_address}', 'display_name': f'User Workstation {j}'}]})
-            connections.setdefault(f'switch_cluster{i}', []).append(( f'ClusterWorkstation{j}',))
+            config.append(get_baseline_dict(item_type= "cluster", name=f'ClusterWorkstation{i+j}', cluster_type='endpoint',
+                              nodes= [get_baseline_dict(item_type='device', name=f'Workstation{i+j}', device_type="Workstation", ip=f'{ip_address}', display_name=f'User Workstation {i+j}')]))
+            connections.setdefault(f'switch_cluster{i}', []).append(( f'ClusterWorkstation{i+j}',))
         
     return config, connections
 
@@ -143,6 +190,24 @@ def generate_example_data(prob_type: str, items: list) -> list[dict[str, str]]:
     example_data = []
 
     for item in items:
+        if item['type'] == "device":
+            example_data.append({
+                "Latency": item["Latency"],
+                "PortsClosed": item["PortsClosed"],
+                "PortsFiltered": item["PortsFiltered"],
+                "PortsOpen": item["PortsOpen"]
+            })
+        elif item['type'] == "cluster":
+            for node in item['nodes']:
+                example_data.append({
+                "Latency": node["Latency"],
+                "PortsClosed": node["PortsClosed"],
+                "PortsFiltered": node["PortsFiltered"],
+                "PortsOpen": node["PortsOpen"]
+            })
+            
+        else:
+            assert(False)
         item_info = dict()
         # don't put cidr blocks in the nmap
         if item["device_type"] == "cluster":
@@ -196,18 +261,21 @@ def get_answer_defaults(prob_type: str) -> dict:
         raise NameError("Problem type not found")
     return portscan_defaults if portscan else pingscan_defaults
 
-def generate_answers(prob_type: str, example_data: list[dict], ) -> dict:
+def generate_answers(prob_type: str, example_data: list[dict], cidr_blocks) -> dict:
     answers = get_answer_defaults(prob_type)
 
-    pRangeAnswer = ['6881-6889', '6881,6882,6883,6884,6885,6886,6887,6888,6889']
-    answers["pRangeAnswer"] = pRangeAnswer
+    # pRangeAnswer = ['6881-6889', '6881,6882,6883,6884,6885,6886,6887,6888,6889']
+    # answers["pRangeAnswer"] = pRangeAnswer
 
-    answers['portsAnswer'] = [item for portRange in pRangeAnswer for item in [f'-p {portRange}', f'-pT {portRange}']]
-    # If i have two subnets, I need to scan both
+    # answers['portsAnswer'] = [item for portRange in pRangeAnswer for item in [f'-p {portRange}', f'-pT {portRange}']]
+    answers["portsAnswer"] = ['-p 6881-6889']
+    # Scan the relevant cidr blocks, or in this case, all of them
+    answers["ipAnswer"] =  [str(block) for block in cidr_blocks] 
+    # answers["ipAnswer"] =  generate_all_nmap_options(cidr_blocks)
+    
 
-    # global portsAnswer = ['-p 6881-6889','-pT 6881-6889', '-p 6881,6882,6883,6884,6885,6886,6887,6888,6889','-pT 6881,6882,6883,6884,6885,6886,6887,6888,6889']
-    # global pRangeAnswer = ['6881-6889','6881,6882,6883,6884,6885,6886,6887,6888,6889']
-    # global ipAnswer = ['172.16.0.0/12'];
+    # Now to actually make the answers there
+    # for random.randint(0,1)
     # global leftAnswer = ['172.16.31.102'];
     # global rightAnswer = ['3'];
 
@@ -220,6 +288,52 @@ def gen_problem_file(prob_type: str, items: list) -> list:
     content['probtxt'] = "We have received a DMCA complaint that someone is sharing copyrighted material from our corporate network via bittorrent. Conduct a scan with nmap to find out which workstation is responsible.    ( Bittorrent is known to use TCP ports in the range 6881 – 6889 )"
     content["imgAddress"]
     return []
+
+def dict_to_nools_value(value):
+    """Convert Python values to nools-compatible format"""
+    if isinstance(value, bool):
+        return str(value).lower()
+    elif isinstance(value, str):
+        return f'"{value}"'
+    elif isinstance(value, list):
+        return json.dumps(value)
+    elif isinstance(value, dict):
+        return json.dumps(value)
+    else:
+        return str(value)
+
+def generate_nools_file(data_dict, output_file, imports=None):
+    if imports is None:
+        imports = [
+            "productionRules.nools",
+            "SkillDefinitions.nools"
+        ]
+    
+    with open(output_file, 'w') as f:
+        # Write imports
+        for imp in imports:
+            f.write(f'import("{imp}");\n')
+        
+        # Write globals
+        for key, value in data_dict.items():
+            nools_value = dict_to_nools_value(value)
+            f.write(f'global {key} = {nools_value};\n')
+
+# Usage
+your_data = {
+    'probType': "Bad Ports",
+    'fixLeft': False,
+    'oneColumn': False,
+    'probtxt': "We have received a DMCA complaint...",
+    'imgAdress': "Assets/nmap.png",
+    'title': "Tutor2: NMAP problem 1",
+    'sudoAnswer': ['sudo'],
+    'nmapAnswer': ['nmap'],
+    'exampledata': [
+        {"IP": "172.16.0.1", "Latency": "0.062", "PortsOpen": "22 53 80 443"},
+        # ... more data
+    ]
+}
 
 
 
@@ -251,4 +365,8 @@ if __name__ == "__main__":
     print("Generating Example Data")
     example_data = generate_example_data(prob_type, network.all_ips)
     print(example_data)
+
+    # Generate problem file
+
+    # generate_nools_file(your_data, "output.nools")
 
