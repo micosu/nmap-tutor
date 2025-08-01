@@ -65,11 +65,12 @@ class NetworkItem:
     }
 
 
-    def __init__(self, name, ip, device_type):
+    def __init__(self, name, ip, type_, properties = {}):
         self.connections: dict['NetworkItem', tuple[str, tuple[str, str]]] = {}
         self.name = name
         self.ip = ip
-        self.device_type = device_type
+        self.type = type_
+        self.properties = properties
 
     def connect_to(self, other_device: 'NetworkItem' , hierarchy:str = "child", labels: tuple[str, str] = ("", "")):
         """DRY way to create connections"""
@@ -185,8 +186,10 @@ class NetworkDevice(NetworkItem):
     }
     
     def __init__(self, name: str, device_type: str, ip: Optional[str] = None, display_name: Optional[str] = None, **kwargs):
-        super().__init__(name, ip, device_type)
+        properties = kwargs.get('properties', {})
+        super().__init__(name, ip, type_ = "device", properties=properties)
         self.display_name = display_name or name
+        self.device_type = device_type
         
         defaults = self.DEVICE_DEFAULTS.get(device_type, {})
 
@@ -199,7 +202,7 @@ class NetworkDevice(NetworkItem):
         self.offset: dict[int, List[tuple[float, float, str]]] = kwargs.get('offset', defaults.get('offset', NetworkDevice.offsets["Normal"]))
         
         # Extra properties
-        self.properties = kwargs.get('properties', {})
+        
         
         # Validate on creation
         self._validate()
@@ -264,9 +267,9 @@ class Cluster(NetworkItem):
     }
 
     def __init__(self, nodes: list['NetworkDevice'], cluster_type: str, name: str, ip: Optional[str] = None, **kwargs):
-        super().__init__(name, ip, device_type="cluster")
+        super().__init__(name, ip, type_="cluster")
         self.nodes = nodes
-        self.type = cluster_type
+        self.cluster_type = cluster_type
         defaults = self.CLUSTER_DEFAULTS.get(cluster_type, {})
 
         self.style= kwargs.get('style', defaults.get('style', 'filled,rounded'))
@@ -275,6 +278,8 @@ class Cluster(NetworkItem):
         self.fontcolor = kwargs.get('fontcolor', defaults.get('fontcolor', 'black'))
         self.offset = kwargs.get('offset', defaults.get('offset', Cluster.offset))
         self.label = kwargs.get('label', None)
+
+        self.properties = kwargs.get('properties', {})
 
     def get_nodes(self):
         return self.nodes
@@ -451,7 +456,7 @@ class Network:
             if item.ip:
                 network_ips.append({
                     'ip_address': item.ip,
-                    'device_type': item.device_type, 
+                    'device_type': item.type, 
                     'ip_type': "device"
                 })
 
@@ -459,14 +464,14 @@ class Network:
                 if len(ips) > 0 and ips[0] != "":
                     network_ips.append({
                     'ip_address': ips[0],
-                    'device_type': item.device_type, 
+                    'device_type': item.type, 
                     'ip_type': "interface"
                 })
 
                 if len(ips) > 1 and ips[1] != "":
                     network_ips.append({
                     'ip_address': ips[1],
-                    'device_type': neighbor.device_type, 
+                    'device_type': neighbor.type, 
                     'ip_type': "interface"
                 })
 
@@ -516,6 +521,16 @@ class Network:
         # print("PyGraphviz network diagram created with neato!")
         # Add all connections
         return f"{output_name}.png"
+    
+    @property
+    def workstations(self) -> list:
+        ws = list()
+        for item in self.items.values():
+            if isinstance(item, NetworkDevice):
+
+                if item.device_type == "Workstation":
+                    ws.append(item)
+        return ws
 
 if __name__ == "__main__":
     # Generate example network
