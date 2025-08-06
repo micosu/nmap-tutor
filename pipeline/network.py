@@ -101,8 +101,8 @@ class NetworkItem:
         for i, connection in enumerate(self.above):
             (hier, labels) = self.connections[connection]
             
-            if not connection.connector_node:
-                connection.set_connector_node("up")
+            if not self.connector_node:
+                self.set_connector_node("up")
 
             # Kind of hard coding cases where user location is above a dmz
             if connection.name != "UserLocation":
@@ -114,31 +114,50 @@ class NetworkItem:
 
         for i, connection in enumerate(self.same):
             (hier, labels) = self.connections[connection]
-            if not connection.connector_node:
-                connection.set_connector_node(dir_offset[i][2])
+            if not self.connector_node:
+                self.set_connector_node(dir_offset[i][2])
             connection.add_to_map(network, graph, (pos[0] + dir_offset[i][0] * network.x_spacing, pos[1] + dir_offset[i][1] * network.y_spacing), dir_offset[i][2])
             
 
         for i, connection in enumerate(self.children):
             (hier, labels) = self.connections[connection]
-            if not connection.connector_node:
-                connection.set_connector_node(offset[i][2])
-            connection.add_to_map(network, graph, (pos[0] + offset[i][0] * network.internal_spacing, pos[1] + offset[i][1] * network.y_spacing), offset[i][2])
+            if not self.connector_node:
+                self.set_connector_node(offset[i][2])
+            new_pos = graph.get_node(self.child_connector_node.name).attr['pos'].strip("!").split(",")
+            new_pos = float(new_pos[0]), float(new_pos[1])
+            connection.add_to_map(network, graph, (new_pos[0] + offset[i][0] * network.internal_spacing, new_pos[1] + offset[i][1] * network.y_spacing*1.3), offset[i][2])
     
     def add_edges(self, network: 'Network', graph: 'pgv.AGraph'):
         for connection in self.neighbors:
             (hier, labels) = self.connections[connection]
             if self.name not in ["Internet"]:
                 # print(f"adding edge between {self.name} and {connection.name}")
-                graph.add_edge(self.connector_node.name, connection.connector_node.name, taillabel = labels[0], headlabel=labels[1])
+                if hier == "same":
+                    graph.add_edge(self.same_connector_node.name, connection.set_connector_node().name, taillabel = labels[0], headlabel=labels[1])
+                elif hier == "above":
+                    graph.add_edge(self.above_connector_node.name, connection.set_connector_node().name, taillabel = labels[0], headlabel=labels[1])
+                else:
+                    graph.add_edge(self.child_connector_node.name, connection.set_connector_node().name, taillabel = labels[0], headlabel=labels[1])
+
             connection.add_edges(network, graph)
 
 
-    def set_connector_node(self, dir = "down"):
-        self.connector_node: Optional["NetworkItem"] = self
+    def set_connector_node(self, dir = "down") -> "NetworkItem":
+        if self.connector_node is None:
+            self.connector_node: Optional["NetworkItem"] = self
+        return self.connector_node
 
-    def position(self):
-        pass
+    @property
+    def same_connector_node(self):
+        return self.connector_node
+    
+    @property
+    def above_connector_node(self):
+        return self.connector_node
+    
+    @property
+    def child_connector_node(self):
+        return self.connector_node
 
 class NetworkDevice(NetworkItem):
     """Representation for individual nodes on our network and how they connect to each other"""
@@ -153,7 +172,7 @@ class NetworkDevice(NetworkItem):
         'Router': {
             0: [],
             1: [(2, 0, 'right')], 
-            2: [(-1, 0, 'left'), (1, 0, 'right')],
+            2: [(-2, 0, 'left'), (2, 0, 'right')],
             3: [(-1, 0, 'left'), (0, -1, 'down'), (1, 0, 'right')],
             4: [(-1, .5, 'left'), (-1, -1, 'down'), (1, .5, 'right'), (2, -1, 'down')]
         },
@@ -323,7 +342,6 @@ class Cluster(NetworkItem):
         super().add_to_map(network, graph, pos, dir)
 
         if self.graphviz_label:
-            assert(self.connector_node)
             center:tuple[float, float] = self.get_center(graph)
             graph.add_node(self.name+"_label",
                         label=self.graphviz_label,
@@ -351,7 +369,7 @@ class Cluster(NetworkItem):
             right = graph.get_node(self.nodes[len(self.nodes) // 2].name).attr['pos'].strip("!").split(",")
             return (float(left[0]) + float(right[0])) / 2, (float(left[1]) + float(right[1])) / 2
    
-    def set_connector_node(self, dir="down"):
+    def set_connector_node(self, dir="down") -> "NetworkItem":
         if self.connector_node:
             return self.connector_node
         print(f"Direction is {dir}")
@@ -364,6 +382,14 @@ class Cluster(NetworkItem):
             self.connector_node = self.nodes[0]
         else:
             self.connector_node = self.nodes[0]
+
+        return self.connector_node
+    
+    @property
+    def child_connector_node(self):
+        return self.nodes[len(self.nodes) // 2]
+    
+
 
 class Network:
     """Container for the entire network - keeps everything organized"""
@@ -522,6 +548,13 @@ class Network:
             'mode': 'major'
         })
 
+        self.map.graph_attr.update(
+    nodesep='0.8',          # Fixed horizontal spacing
+    ranksep='1.2',          # Fixed vertical spacing
+    ordering='out',         # Better edge ordering
+    concentrate='true'      # Merge similar edges
+)
+
         self.map.node_attr.update({
             'fontname': 'Arial',
             'fontsize': '14'
@@ -534,7 +567,7 @@ class Network:
         # debug_before_after_layout(self.map, "After adding all nodes, before any edges")
 
         # # Add first edge
-        self.map.add_edge('Internet', 'BorderRouter', taillabel='128.237.3.102')
+        # self.map.add_edge('Internet', 'BorderRouter', taillabel='128.237.3.102')
         # debug_before_after_layout(self.map, "After first edge, before layout")
 
         self.map.layout(prog='neato')
@@ -569,6 +602,12 @@ class Network:
                 if item.device_type == "Server":
                     server_list.append(item)
         return server_list
+    
+    def all_positions(self):
+        for item in self.items.values():
+            if item.type != "cluster":
+                print(f"item {item.name} is at position {self.map.get_node(item.name).attr['pos'].strip('!').split(',')}")
+
 
 if __name__ == "__main__":
     # Generate example network
@@ -593,8 +632,3 @@ if __name__ == "__main__":
     })
 
     network.generate_map("one_subnet")
-
-    # Paused:
-    # Next steps: add positions into network map, starting from internet
-    # Future, add functions for adding a bunch of items to the network, with their connections
-    # Even more future, add a "generate random map function"

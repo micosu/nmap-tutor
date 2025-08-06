@@ -181,15 +181,15 @@ def generate_network_config(prob_type: str, cidr_blocks: list['IPNetwork']) -> l
         for j in range(1,random.randint(3, 4)):
             ip_address = net[offset+j]
             if prob_type == "Bad Ports":
-                workstation= get_baseline_dict(item_type= "cluster", name=f'ClusterWorkstation_{i+j}', cluster_type='endpoint',
-                                nodes= [get_baseline_dict(item_type='device', name=f'Workstation_{i+j}', device_type="Workstation", ip=f'{ip_address}', display_name=f'User Workstation {i+j}')])
+                workstation= get_baseline_dict(item_type= "cluster", name=f'ClusterWorkstation_{(i*3)+j}', cluster_type='endpoint',
+                                nodes= [get_baseline_dict(item_type='device', name=f'Workstation_{(i*3)+j}', device_type="Workstation", ip=f'{ip_address}', display_name=f'User Workstation {(i*3)+j}')])
                 config.append(workstation)
-                switch["connections"].append(( f'ClusterWorkstation_{i+j}', "child", ("","")))
+                switch["connections"].append(( f'ClusterWorkstation_{(i*3)+j}', "child", ("","")))
             elif prob_type == "Identify Services":
-                workstation= get_baseline_dict(item_type= "cluster", name=f'ClusterWorkstation_{i+j}', cluster_type='endpoint',
-                                nodes= [get_baseline_dict(item_type='device', name=f'Workstation_{i+j}', device_type="Workstation", ip=f'{ip_address}', display_name=f'{services[j-1]}')])
+                workstation= get_baseline_dict(item_type= "cluster", name=f'ClusterWorkstation_{(i*3)+j}', cluster_type='endpoint',
+                                nodes= [get_baseline_dict(item_type='device', name=f'Workstation_{(i*3)+j}', device_type="Workstation", ip=f'{ip_address}', display_name=f'{services[j-1]}')])
                 config.append(workstation)
-                dmz["connections"].append(( f'ClusterWorkstation_{i+j}', "child", ("","")))
+                dmz["connections"].append(( f'ClusterWorkstation_{(i*3)+j}', "child", ("","")))
         
     # return config, connections
     return config
@@ -206,7 +206,7 @@ def generate_network(items: list) -> 'Network':
     Returns:
         dict: Dictionary representation of network map
     """
-    map_rep = Network("ExampleNetwork")
+    map_rep = Network("ExampleNetwork", x_spacing= .5, y_spacing= .3333, internal_spacing=.25)
     map_rep.add_items_from_config(items)
     connections = dict()
     for item in items:
@@ -431,16 +431,17 @@ def pipeline(prob_type, **kwargs):
     network = generate_network(config)
     print("Generating network map")
     nmap = network.generate_map('Problem6')
-    answers = generate_answers(prob_type, network, cidr_blocks)
-    print("Answers: ", answers)
-    example_data = generate_example_data(prob_type, network)
-    print("Example Data: ", example_data)
+    network.all_positions()
+    # answers = generate_answers(prob_type, network, cidr_blocks)
+    # print("Answers: ", answers)
+    # example_data = generate_example_data(prob_type, network)
+    # print("Example Data: ", example_data)
 
-    print("Generating Problem Dictionary")
-    problem = gen_problem_dict("Identify Services", nmap, answers, example_data, 7)
-    print(problem)
+    # print("Generating Problem Dictionary")
+    # problem = gen_problem_dict("Identify Services", nmap, answers, example_data, 7)
+    # print(problem)
 
-    generate_nools_file(problem, "problem7.nools")
+    # generate_nools_file(problem, "problem7.nools")
 
 
 if __name__ == "__main__":
@@ -483,5 +484,5 @@ if __name__ == "__main__":
     # print(problem)
     # generate_nools_file(problem, "problem5.nools")
 
-    pipeline("Identify Services")
+    pipeline(prob_type="Bad Ports", subnets=2)
 
