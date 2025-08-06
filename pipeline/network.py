@@ -71,6 +71,7 @@ class NetworkItem:
         self.ip = ip
         self.type = type_
         self.properties = properties
+        self.connector_node = None
 
     def connect_to(self, other_device: 'NetworkItem' , hierarchy:str = "child", labels: tuple[str, str] = ("", "")):
         """DRY way to create connections"""
@@ -99,18 +100,30 @@ class NetworkItem:
 
         for i, connection in enumerate(self.above):
             (hier, labels) = self.connections[connection]
-            connection.add_to_map(network, graph, (pos[0] + 0 * network.x_spacing, pos[1] + 1 * network.y_spacing), "up")
-            # graph.add_edge(self.connector_node.name, connection.connector_node.name, taillabel = labels[0], headlabel=labels[1])
+            
+            if not connection.connector_node:
+                connection.set_connector_node("up")
+
+            # Kind of hard coding cases where user location is above a dmz
+            if connection.name != "UserLocation":
+                connection.add_to_map(network, graph, (pos[0] + 0 * network.x_spacing, pos[1] + 1 * network.y_spacing), "up")
+            else: 
+                connection.add_to_map(network, graph, (pos[0] - self.directions[dir][1][0][0] * .4 * network.x_spacing, pos[1] + 1 * network.y_spacing), "up")
+            
+
 
         for i, connection in enumerate(self.same):
             (hier, labels) = self.connections[connection]
+            if not connection.connector_node:
+                connection.set_connector_node(dir_offset[i][2])
             connection.add_to_map(network, graph, (pos[0] + dir_offset[i][0] * network.x_spacing, pos[1] + dir_offset[i][1] * network.y_spacing), dir_offset[i][2])
-            # graph.add_edge(self.connector_node.name, connection.connector_node.name, taillabel = labels[0], headlabel=labels[1])
+            
 
         for i, connection in enumerate(self.children):
             (hier, labels) = self.connections[connection]
+            if not connection.connector_node:
+                connection.set_connector_node(offset[i][2])
             connection.add_to_map(network, graph, (pos[0] + offset[i][0] * network.internal_spacing, pos[1] + offset[i][1] * network.y_spacing), offset[i][2])
-            # graph.add_edge(self.connector_node.name, connection.connector_node.name, taillabel = labels[0], headlabel=labels[1])
     
     def add_edges(self, network: 'Network', graph: 'pgv.AGraph'):
         for connection in self.neighbors:
@@ -120,12 +133,10 @@ class NetworkItem:
                 graph.add_edge(self.connector_node.name, connection.connector_node.name, taillabel = labels[0], headlabel=labels[1])
             connection.add_edges(network, graph)
 
-        
 
-    @property
-    def connector_node(self):
-        return self
-    
+    def set_connector_node(self, dir = "down"):
+        self.connector_node: Optional["NetworkItem"] = self
+
     def position(self):
         pass
 
@@ -180,7 +191,7 @@ class NetworkDevice(NetworkItem):
         "Switch": {"symbol": "🔀", "fillcolor": "none", "fontcolor": "white", "shape": 'none', "offset": offsets["Normal"]},
         "Controller": {"symbol": "🖥", "fillcolor": "none", "fontcolor": "white", "shape": 'none', "offset": offsets["Normal"]},
         "Firewall": {"symbol": "🛡", "fillcolor": "lightgrey", "fontcolor": "black","shape": "square", "style":"filled", "offset": offsets["Normal"]},
-        "Server": {"symbol": "🗄️", "fillcolor": "green", "fontcolor": "white", "width": "1", "offset": offsets["Normal"]},
+        "Server": {"symbol": "🗄️", "fillcolor": "none", "fontcolor": "white", "width": "1", "shape": 'none', "offset": offsets["Normal"]},
         "Workstation": {"symbol": "💻", "fillcolor": "lightblue", "fontcolor": "black", "offset": offsets["Normal"]},
         "User": {"symbol": "📍", "fillcolor": '#CCA4D3', "shape": "ellipse", "style": "filled", "offset": offsets["Normal"]}
     }
@@ -234,6 +245,8 @@ class NetworkDevice(NetworkItem):
     
     def add_to_map(self, network: 'Network', graph: 'pgv.AGraph', pos: tuple, dir: str ="right"):
         if pos in network.positions:
+            print(f"Adding {self.name} to an already occupied position")
+
             assert(False)
         else:
             network.positions.add(pos)
@@ -280,6 +293,7 @@ class Cluster(NetworkItem):
         self.label = kwargs.get('label', None)
 
         self.properties = kwargs.get('properties', {})
+        self.connector_node = None
 
     def get_nodes(self):
         return self.nodes
@@ -309,33 +323,47 @@ class Cluster(NetworkItem):
         super().add_to_map(network, graph, pos, dir)
 
         if self.graphviz_label:
-            center:tuple[str, str] = graph.get_node(self.connector_node.name).attr['pos'].strip("!").split(",")
+            assert(self.connector_node)
+            center:tuple[float, float] = self.get_center(graph)
             graph.add_node(self.name+"_label",
                         label=self.graphviz_label,
                         shape='rectangle',  # Invisible node, just text
                         style='filled,rounded',
                         color='lightblue',
                         fontsize='12',
-                        pos=f'{center[0]},{float(center[1]) + network.internal_spacing/3}!') 
+                        pos=f'{center[0]},{center[1] + network.internal_spacing/1.5}!') 
             
     def __str__(self):
         return f"Cluster {self.name}"
     
     def __repr__(self):
         return f"Cluster {self.name}"
+    
+    def get_center(self, graph):
+        # if it's odd, return position of center node
+        # if it's even, average positions of center nodes
+        print("Self nodes length: ", len(self.nodes))
+        if len(self.nodes) % 2 != 0:
+            center = graph.get_node(self.nodes[len(self.nodes) // 2].name).attr['pos'].strip("!").split(",")
+            return float(center[0]), float(center[1])
+        else:
+            left = graph.get_node(self.nodes[len(self.nodes) // 2 - 1].name).attr['pos'].strip("!").split(",")
+            right = graph.get_node(self.nodes[len(self.nodes) // 2].name).attr['pos'].strip("!").split(",")
+            return (float(left[0]) + float(right[0])) / 2, (float(left[1]) + float(right[1])) / 2
    
-
-    @property
-    def connector_node(self, dir="down"):
+    def set_connector_node(self, dir="down"):
+        if self.connector_node:
+            return self.connector_node
+        print(f"Direction is {dir}")
         # middle node
         if dir == "down":
-            return self.nodes[len(self.nodes) // 2]
+            self.connector_node = self.nodes[len(self.nodes) // 2]
         elif dir =="left":
-            return self.nodes[len(self.nodes)-1]
+            self.connector_node = self.nodes[len(self.nodes)-1]
         elif dir =="right":
-            return self.nodes[0]
+            self.connector_node = self.nodes[0]
         else:
-            return  self.nodes[0]
+            self.connector_node = self.nodes[0]
 
 class Network:
     """Container for the entire network - keeps everything organized"""
@@ -523,7 +551,7 @@ class Network:
         return f"{output_name}.png"
     
     @property
-    def workstations(self) -> list:
+    def workstations(self) -> list['NetworkDevice']:
         ws = list()
         for item in self.items.values():
             if isinstance(item, NetworkDevice):
@@ -531,6 +559,16 @@ class Network:
                 if item.device_type == "Workstation":
                     ws.append(item)
         return ws
+    
+    @property
+    def servers(self) -> list['NetworkDevice']:
+        server_list = list()
+        for item in self.items.values():
+            if isinstance(item, NetworkDevice):
+
+                if item.device_type == "Server":
+                    server_list.append(item)
+        return server_list
 
 if __name__ == "__main__":
     # Generate example network

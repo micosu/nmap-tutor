@@ -116,7 +116,7 @@ def get_baseline_dict(item_type, name, **kwargs) -> dict[str, Any]:
 
     return baseline
 
-def generate_network_config(problem_type: str, cidr_blocks: list['IPNetwork']) -> list:
+def generate_network_config(prob_type: str, cidr_blocks: list['IPNetwork']) -> list:
     """
     Generate a list of CIDR blocks in a private range.
 
@@ -144,42 +144,57 @@ def generate_network_config(problem_type: str, cidr_blocks: list['IPNetwork']) -
     
     for i in range(len(cidr_blocks)):
         net = cidr_blocks[i]
-        firewall = get_baseline_dict(item_type="device", device_type="Firewall", name=f'Firewall{i}')
-        switch = get_baseline_dict(item_type = "cluster", name=f'switch_cluster{i}', cluster_type='intermediate', 
-                              nodes= [get_baseline_dict(item_type="device", name=f'Switch{i}', device_type= 'Switch')])
-        office = get_baseline_dict(item_type = "cluster", name=f'Office{i}', cluster_type='intermediate', ip= str(net),
-                              nodes= [get_baseline_dict(item_type="device", name= f'DomainController{i}', device_type="Controller", ip= f'{net[10]}', display_name= 'Domain Controller')])
-        config = config + [
-            firewall,
-            switch,
-            office
-            ]
+        firewall = get_baseline_dict(item_type="device", device_type="Firewall", name=f'Firewall_{i}')
+        router.setdefault("connections", []).append((f"Firewall_{i}", "child", (f"  {net[1]}  ", f"  {net[3]}  ")))
+        if prob_type == "Bad Ports":
+            switch = get_baseline_dict(item_type = "cluster", name=f'switch_cluster_{i}', cluster_type='intermediate', 
+                              nodes= [get_baseline_dict(item_type="device", name=f'Switch_{i}', device_type= 'Switch')])
+            office = get_baseline_dict(item_type = "cluster", name=f'Office_{i}', cluster_type='intermediate', ip= str(net),
+                                nodes= [get_baseline_dict(item_type="device", name= f'DomainController_{i}', device_type="Controller", ip= f'{net[10]}', display_name= 'Domain Controller')])
+            config = config + [
+                firewall,
+                switch,
+                office
+                ]
+            firewall["connections"] = [(f'switch_cluster_{i}', "same", (f"  {net[5]}  ", ""))]
+            switch["connections"] = [(f'Office_{i}', "above", ("", ""))]
+        elif prob_type == "Identify Services":
+            dmz = get_baseline_dict(item_type = "cluster", name=f'DMZ_{i}', cluster_type='intermediate', ip= str(net),
+                                nodes= [get_baseline_dict(item_type="device", name= f'Server_{i+j}', device_type="Server", ip= f'{net[10 + j]}', display_name= f'Server {i+j}') for j in range(1,4)])
+            config = config + [
+                firewall,
+                dmz
+                ]
+            firewall["connections"] = [(f'DMZ_{i}', "same", (f"  {net[5]}  ", ""))]
         
-        router.setdefault("connections", []).append((f"Firewall{i}", "child", (f"  {net[1]}  ", f"  {net[3]}  ")))
-        firewall["connections"] = [(f'switch_cluster{i}', "same", (f"  {net[5]}  ", ""))]
-        # connections.setdefault("BorderRouter", []).append((f"Firewall{i}", "child", (f"  {net[1]}  ", f"  {net[3]}  ")))
-        # connections[f'Firewall{i}'] = [(f'switch_cluster{i}', "same", (f"  {net[5]}  ", ""))]
         
-        # connections[f'switch_cluster{i}'] = [(f'Office{i}', "above",)]
-        switch["connections"] = [(f'Office{i}', "above", ("", ""))]
-        if not has_user_loc:
-            # connections[f'switch_cluster{i}'].append(("UserLocation", "same", ("", f"  {net[20]}  ", "")))
+        
+        if not has_user_loc and prob_type == "Bad Ports":
             switch["connections"].append(("UserLocation", "same", ("", f"  {net[20]}  ")))
+            has_user_loc = True
+        if not has_user_loc and prob_type == "Identify Services":
+            dmz["connections"] = [("UserLocation", "above", ("", f"  {net[20]}  "))]
             has_user_loc = True
 
         offset = random.randint(40, 100)
+        services = ["Kiosk Computer", "Digital Signage", "Vending Machine"]
         for j in range(1,random.randint(3, 4)):
             ip_address = net[offset+j]
-            workstation= get_baseline_dict(item_type= "cluster", name=f'ClusterWorkstation{i+j}', cluster_type='endpoint',
-                              nodes= [get_baseline_dict(item_type='device', name=f'Workstation{i+j}', device_type="Workstation", ip=f'{ip_address}', display_name=f'User Workstation {i+j}')])
-            config.append(workstation)
-            switch["connections"].append(( f'ClusterWorkstation{i+j}', "child", ("","")))
-            # connections.setdefault(f'switch_cluster{i}', []).append(( f'ClusterWorkstation{i+j}',))
+            if prob_type == "Bad Ports":
+                workstation= get_baseline_dict(item_type= "cluster", name=f'ClusterWorkstation_{i+j}', cluster_type='endpoint',
+                                nodes= [get_baseline_dict(item_type='device', name=f'Workstation_{i+j}', device_type="Workstation", ip=f'{ip_address}', display_name=f'User Workstation {i+j}')])
+                config.append(workstation)
+                switch["connections"].append(( f'ClusterWorkstation_{i+j}', "child", ("","")))
+            elif prob_type == "Identify Services":
+                workstation= get_baseline_dict(item_type= "cluster", name=f'ClusterWorkstation_{i+j}', cluster_type='endpoint',
+                                nodes= [get_baseline_dict(item_type='device', name=f'Workstation_{i+j}', device_type="Workstation", ip=f'{ip_address}', display_name=f'{services[j-1]}')])
+                config.append(workstation)
+                dmz["connections"].append(( f'ClusterWorkstation_{i+j}', "child", ("","")))
         
     # return config, connections
     return config
 
-# subnet: [(number of servers, ports open, number of users, ports open, whether theres a firewall), ...]
+
     
 def generate_network(items: list) -> 'Network':
     """
@@ -239,31 +254,38 @@ def get_answer_defaults(prob_type: str) -> dict:
 
 def generate_answers(prob_type: str, network: 'Network', cidr_blocks) -> dict:
     answers = get_answer_defaults(prob_type)
-
-    # pRangeAnswer = ['6881-6889', '6881,6882,6883,6884,6885,6886,6887,6888,6889']
-    # answers["pRangeAnswer"] = pRangeAnswer
-
-    # answers['portsAnswer'] = [item for portRange in pRangeAnswer for item in [f'-p {portRange}', f'-pT {portRange}']]
-    answers["portsAnswer"] = ['-p 6881-6889']
-    # Scan the relevant cidr blocks, or in this case, all of them
-    answers["ipAnswer"] =  [str(block) for block in cidr_blocks] 
-    # answers["ipAnswer"] =  generate_all_nmap_options(cidr_blocks)
     
-
-    # Now to actually make the answers there
-    # for random.randint(0,1)
-    workstations = network.workstations
-    ws_count:int = len(workstations)
-    bad_ws = random.randint(1, ws_count)
-    shuffled_ws = random.sample(workstations, ws_count)
-    left_answer = []
-    right_answer = []
-    for ws in shuffled_ws[:bad_ws]:
-        ws.properties["PortsOpen"] += " 6884"
-        left_answer.append(ws.ip)
-        right_answer.append(ws.display_name.split(" ")[2])
+    if prob_type == "Bad Ports":
+        answers["portsAnswer"] = ['-p 6881-6889']
+        # Scan the relevant cidr blocks, or in this case, all of them
+        answers["ipAnswer"] =  [str(block) for block in cidr_blocks] 
+        # answers["ipAnswer"] =  generate_all_nmap_options(cidr_blocks)
+        workstations = network.workstations
+        ws_count:int = len(workstations)
+        bad_ws = random.randint(1, ws_count)
+        shuffled_ws = random.sample(workstations, ws_count)
+        left_answer = []
+        right_answer = []
+        for ws in shuffled_ws[:bad_ws]:
+            ws.properties["PortsOpen"] += " 6884"
+            left_answer.append(ws.ip)
+            right_answer.append(ws.display_name.split(" ")[2])
+    elif prob_type == "Identify Services":
+        answers["portsAnswer"] = ['-p 80,443,25,465,587,2525,53']
+        answers["ipAnswer"] =  [str(block) for block in cidr_blocks]
+        servers = network.servers
+        portsOpen = {
+            "Web Server": "22 53 80 443",
+            "Mail Server": "25 465 587 2525",
+            "DNS Server": "53"
+        }
+        # Random ordering of servers so that the first one isn't always the Web Server
+        left_answer = list(portsOpen.keys())
+        right_answer = []
+        for server, portOpen in zip(random.sample(servers, len(servers)), portsOpen.values()):
+            server.properties["PortsOpen"] = portOpen
+            right_answer.append(server.ip)
     
-
     answers["leftAnswer"] = left_answer
     answers["rightAnswer"] = right_answer
 
@@ -305,22 +327,57 @@ def generate_example_data(prob_type: str, network: "Network") -> list[dict[str, 
 
     return example_data
 
-def get_problem_defaults(prob_type: str) -> dict:
-    i = 5
+def get_problem_defaults(prob_type: str, prob_number: int) -> dict:
     if prob_type == "Bad Ports":
         defaults = {
             'probType': "Bad Ports",
             'fixLeft': False,
             'oneColumn': False,
             'probtxt': "We have received a DMCA complaint that someone is sharing copyrighted material from our corporate network via bittorrent. Conduct a scan with nmap to find out which workstation is responsible.   ( Bittorrent is known to use TCP ports in the range 6881 - 6889 )",
-            'title': f"Tutor: NMAP problem {i}",
+            'title': f"Tutor: NMAP problem {prob_number}",
             'opQuestion': 'Based on the output, which workstation is responsible?',
             'leftTitle': 'IP Address',
             'rightTitle': 'Workstation Number'
         }
+    elif prob_type == "Identify Services":
+        defaults = {
+            'probType': "Identify Services",
+            'fixLeft': True,
+            'oneColumn': False,
+            'probtxt': "The services section of our DMZ network should contain a web server hosting both secure and insecure web connections (HTTP on TCP port 80 and HTTPS on TCP port 443), a mail server (providing SMTP over TCP ports 25, 465, 587 and 2525), and a DNS server (providing DNS lookup over TCP port 53). All other services are prohibited on this network segment. Using nmap, identify which server is configured at which IP address. Scan only the services portion of the DMZ network.FOR THE LAST QUESTION, PLEASE PRESS ENTER EVEN IF THE FIELD IS PREFILLED. THANK YOU.",
+            'title': f"Tutor: NMAP problem {prob_number}",
+            'opQuestion': 'Based on the output, which workstation is responsible?',
+            'leftTitle': 'Server',
+            'rightTitle': 'IP Address'
+        }
+    elif prob_type == "Rogue Workstations":
+        defaults = {
+            'probType': "Rogue Workstations",
+            'fixLeft': False,
+            'oneColumn': True,
+            'probtxt': "Scan both the office network and the entire DMZ with one nmap command. Identify any unaccounted for machines on our corporate networks. The firewalls are configured to allow ICMP echo requests through.",
+            'title': f"Tutor: NMAP problem {prob_number}",
+            'opQuestion': 'Based on the output, list any rogue workstation IPs below:',
+            'leftTitle': 'IP Address',
+            'rightTitle': ''
+        }
+    elif prob_type == "Unresponsive Workstations":
+        defaults = {
+            'probType': "Unresponsive Workstations",
+            'fixLeft': False,
+            'oneColumn': False,
+            'probtxt': "Due to a bad update from a vendor, some of our systems are stuck in a boot loop and have become unresponsive. Scan the corporate network using a single nmap command and identify any systems that are affected so that technicans can be dispatched to roll back the update manually. The firewalls are configured to allow ICMP echo requests through.",
+            'title': f"Tutor: NMAP problem {prob_number}",
+            'opQuestion': 'Based on the output, list any rogue workstation IPs below:',
+            'leftTitle': 'IP Address',
+            'rightTitle': 'Workstation Name'
+        }
+    else:
+        raise ValueError(f"Problem Type: {prob_type} is not a currently accepted problem type")
     return defaults
-def gen_problem_dict(prob_type: str, file_name: str, answers: dict, example_data: list) -> dict:
-    content = get_problem_defaults(prob_type)
+
+def gen_problem_dict(prob_type: str, file_name: str, answers: dict, example_data: list, prob_number: int) -> dict:
+    content = get_problem_defaults(prob_type, prob_number)
     content["imgAddress"] = "Assets/" + file_name
     content.update(answers)
     content["exampledata"] = example_data
@@ -358,7 +415,32 @@ def generate_nools_file(data_dict, output_file, imports=None):
             if key == "imgAddress" or key == "ipAnswer" or key == "rightAnswer":
                 f.write("\n")
 
+def pipeline(prob_type, **kwargs):
+    # subnet: [(number of servers, ports open, number of users, ports open, whether theres a firewall), ...]
+    prob_types = ["Bad Ports", "Identify Services", "Rogue Workstations", "Unresponsive Workstations"]
+    if prob_type not in prob_types:
+        raise ValueError(f"Problem type '{prob_type}' is not currently supported.  Available problem types are {prob_types}")
+    subnets = kwargs.get("subnets", 1)
+    neighbors = kwargs.get('neighbors', True)
+    cidr_blocks = generate_random_cidrs(subnets, neighbors)
+    print("Cidr:", cidr_blocks)
 
+    config = generate_network_config(prob_type, cidr_blocks)
+    print(config)
+    print("Generating Network")
+    network = generate_network(config)
+    print("Generating network map")
+    nmap = network.generate_map('Problem6')
+    answers = generate_answers(prob_type, network, cidr_blocks)
+    print("Answers: ", answers)
+    example_data = generate_example_data(prob_type, network)
+    print("Example Data: ", example_data)
+
+    print("Generating Problem Dictionary")
+    problem = gen_problem_dict("Identify Services", nmap, answers, example_data, 7)
+    print(problem)
+
+    generate_nools_file(problem, "problem7.nools")
 
 
 if __name__ == "__main__":
@@ -372,33 +454,34 @@ if __name__ == "__main__":
     # Generate Answers
     # Generate Problem File
 
-    prob_type = "Bad Ports"
-    cidr_blocks = generate_random_cidrs(subnets= 1, neighbors=True)
-    print("Cidr:", cidr_blocks)
+    # prob_type = "Bad Ports"
+    # cidr_blocks = generate_rand
+    # om_cidrs(subnets= 1, neighbors=True)
+    # print("Cidr:", cidr_blocks)
 
-    # config, connections = generate_network_config("Bad Ports", cidr_blocks)
-    config = generate_network_config("Bad Ports", cidr_blocks)
-    print("Configuration: ", config)
-    # print("Connecions: ", connections)
+    # config = generate_network_config("Bad Ports", cidr_blocks)
+    # print("Configuration: ", config)
 
-    print("Generating Network")
-    network = generate_network(config)
+    # print("Generating Network")
+    # network = generate_network(config)
 
-    print("Generating network map")
-    nmap = network.generate_map('Problem5')
-    # 'imgAdress': "Assets/nmap.png",
+    # print("Generating network map")
+    # nmap = network.generate_map('Problem5')
+    # # 'imgAdress': "Assets/nmap.png",
 
-    # Generate Answers
-    answers = generate_answers("Bad Ports", network, cidr_blocks)
-    print(answers)
+    # # Generate Answers
+    # answers = generate_answers("Bad Ports", network, cidr_blocks)
+    # print(answers)
 
-    print("Generating Example Data")
-    example_data = generate_example_data(prob_type, network)
-    print(example_data)
+    # print("Generating Example Data")
+    # example_data = generate_example_data(prob_type, network)
+    # print(example_data)
 
-    # Generate problem file
-    print("Generating Problem Dictionary")
-    problem = gen_problem_dict("Bad Ports", nmap, answers, example_data)
-    print(problem)
-    generate_nools_file(problem, "problem5.nools")
+    # # Generate problem file
+    # print("Generating Problem Dictionary")
+    # problem = gen_problem_dict("Bad Ports", nmap, answers, example_data)
+    # print(problem)
+    # generate_nools_file(problem, "problem5.nools")
+
+    pipeline("Identify Services")
 

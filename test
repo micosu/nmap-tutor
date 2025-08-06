@@ -1,6 +1,0 @@
-digraph {
-	graph [dpi=72]
-	Router [label="Border Router" fixedsize=true height=1.0 image="icons/router.png" imagescale=true shape=none width=1.5]
-	Switch [label=Switch fixedsize=true height=1.0 image="icons/switch.png" imagescale=true shape=none width=1.5]
-	Router -> Switch [label="172.16.0.1 → 172.16.0.3"]
-}
