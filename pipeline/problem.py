@@ -1,5 +1,6 @@
 from typing import Optional, List, Dict, Any
 from network import Network
+from netaddr import IPNetwork, IPAddress
 import random
 
 class ProblemError(Exception):
@@ -332,9 +333,14 @@ class RogueWorkstations(WorkstationProblem):
         new_items_config = []
         get_baseline = super().get_baseline_dict
         real_ws = network.workstations
+        used = network.used_ips
         for i in range(rogue_num):
             block = random.sample(cidr_blocks, 1)[0]
-            print("CIDR Block", repr(block))
+            while True:
+                rand_int = random.randint(block.first + 1, block.last -1)
+                ip = str(IPAddress(rand_int))
+                print(ip)
+                break
             raise KeyError
             ip_address = net[offset+j]
             workstation= get_baseline(item_type= "cluster", name=f'RogueWorkstationCluster_{i}', cluster_type='endpoint',

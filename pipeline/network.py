@@ -526,6 +526,14 @@ class Network:
                     # Node, hierarchy, and labels
                     node.connect_to(neighbor[0], neighbor[1], neighbor[2])
     @property
+    def used_ips(self):
+        network_ips: set[str] = set()
+        for item in self.items.values():
+            if item.ip:
+                network_ips.add(item.ip)
+
+        return network_ips
+    @property
     def all_ips(self):
         # IP address -> device_type, ip_type
         network_ips: list[dict] = []
