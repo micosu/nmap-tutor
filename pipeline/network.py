@@ -31,37 +31,62 @@ def debug_before_after_layout(graph, stage=""):
 class NetworkItem:
     # If it is a central node (e.g. Internet), neighbors should be placed below it
     directions: dict[str, dict[int, List[tuple[float, float, str]]]] = {
-        'right' : {
+        "north" : {
             0: [],
-            1: [(1, 0, 'right')],
-            2: [(1, -.5, 'right'), (1, .5, 'right')],
-            3: [(1, -.5, 'right'), (1.5, 0, 'right'), (1, .5, 'right')],
+            1: [(0, 1, "north")],
+            2: [(-.5, 1, "west"), (.5, 1, "east")],
+            3: [(-.5, 1, "east"), (0, 1, "east"), (.5, 1, "east")],
         },
-        'left' : {
+        "northeast" : {
             0: [],
-            1: [(-1, 0, 'left')],
-            2: [(-1, -.5, 'left'), (-1, .5, 'left')],
-            3: [(-1, -.5, 'left'), (-1.5, 0, 'left'), (-1, .5, 'left')],
+            1: [(1, 1, "northeast")],
+            2: [(1, -.5, "northeast"), (1, .5, "northeast")],
+            3: [(1, -.5, "northeast"), (1.5, 0, "northeast"), (1, .5, "northeast")],
         },
-        'down' : {
+        "east" : {
             0: [],
-            1: [(0, -1, 'down')],
-            2: [(-.5, -1, 'left'), (.5, -1, 'right')],
-            3: [(1, -.5, 'right'), (1.5, 0, 'right'), (1, .5, 'right')],
+            1: [(1, 0, "east")],
+            2: [(1, -.5, "east"), (1, .5, "east")],
+            3: [(1, -.5, "east"), (1.5, 0, "east"), (1, .5, "east")],
         },
-        'up' : {
+        "southeast" : {
             0: [],
-            1: [(0, 1, 'up')],
-            2: [(-.5, 1, 'left'), (.5, 1, 'right')],
-            3: [(-.5, 1, 'right'), (0, 1, 'right'), (.5, 1, 'right')],
-        }
+            1: [(1, -1, "east")],
+            2: [(1, -.5, "east"), (1, .5, "east")],
+            3: [(1, -.5, "east"), (1.5, 0, "east"), (1, .5, "east")],
+        },
+        "south" : {
+            0: [],
+            1: [(.5, -1.5, "south")],
+            2: [(-.5, -1, "west"), (.5, -1, "east")],
+            3: [(1, -.5, "east"), (1.5, 0, "east"), (1, .5, "east")],
+        },
+        "southwest" : {
+            0: [],
+            1: [(-1, -1, "west")],
+            2: [(-.5, -1, "west"), (.5, -1, "east")],
+            3: [(1, -.5, "east"), (1.5, 0, "east"), (1, .5, "east")],
+        },
+        "west" : {
+            0: [],
+            1: [(-1.1, 0, "west")],
+            2: [(-1, -.5, "west"), (-1, .5, "west")],
+            3: [(-1, -.5, "west"), (-1.5, 0, "west"), (-1, .5, "west")],
+        },
+        "northwest" : {
+            0: [],
+            1: [(-1.25, 1, "northwest")],
+            2: [(-1, -.5, "west"), (-1, .5, "west")],
+            3: [(-1, -.5, "west"), (-1.5, 0, "west"), (-1, .5, "west")],
+        },
+        
     }
     offset = {
         0: [],
-        1: [(0, -1, "down")], 
-        2: [(-.5, -1, "left"), (.5, -1, "right")],
-        3: [(-.5, -1, "left"), (0, -1, "down"), (.5, -1, "right")],
-        4: [(-1, -1, "left"), (-.5, -1, "down"), (.5, -1, "down"), (1, -1, "right")],
+        1: [(0, -1, "south")], 
+        2: [(-.5, -1, "southwest"), (.5, -1, "southeast")],
+        3: [(-.5, -1, "southwest"), (0, -1, "south"), (.5, -1, "southeast")],
+        4: [(-1, -1, "southwest"), (-.5, -1, "south"), (.5, -1, "south"), (1, -1, "southeast")],
     }
 
 
@@ -93,36 +118,31 @@ class NetworkItem:
     def children(self):
         return [neighbor for neighbor in self.connections if self.connections[neighbor][0] == "child" ]
     
-    def add_to_map(self, network: 'Network', graph: 'pgv.AGraph', pos: tuple, dir: str ="right"):
+    def add_to_map(self, network: 'Network', graph: 'pgv.AGraph', pos: tuple, dir: str ="east"):
         offset = self.offset[len(self.children)]
         dir_offset = self.directions[dir][len(self.same)]
         # print(f"Node {self.name} at position {pos} with connections: {self.connections}")
+        if not self.connector_node:
+                self.set_connector_node(dir)
 
         for i, connection in enumerate(self.above):
             (hier, labels) = self.connections[connection]
-            
-            if not self.connector_node:
-                self.set_connector_node("up")
 
             # Kind of hard coding cases where user location is above a dmz
             if connection.name != "UserLocation":
-                connection.add_to_map(network, graph, (pos[0] + 0 * network.x_spacing, pos[1] + 1 * network.y_spacing), "up")
+                connection.add_to_map(network, graph, (pos[0] + 0 * network.x_spacing, pos[1] + 1 * network.y_spacing), "north")
             else: 
-                connection.add_to_map(network, graph, (pos[0] - self.directions[dir][1][0][0] * .4 * network.x_spacing, pos[1] + 1 * network.y_spacing), "up")
+                connection.add_to_map(network, graph, (pos[0] - self.directions[dir][1][0][0] * .4 * network.x_spacing, pos[1] + 1 * network.y_spacing), "north")
             
-
 
         for i, connection in enumerate(self.same):
             (hier, labels) = self.connections[connection]
-            if not self.connector_node:
-                self.set_connector_node(dir_offset[i][2])
+            print(f"Current Item: {self.name}, Going to {connection.name}, in direction {dir}, but offset is {dir_offset[i][2]}")
             connection.add_to_map(network, graph, (pos[0] + dir_offset[i][0] * network.x_spacing, pos[1] + dir_offset[i][1] * network.y_spacing), dir_offset[i][2])
             
 
         for i, connection in enumerate(self.children):
             (hier, labels) = self.connections[connection]
-            if not self.connector_node:
-                self.set_connector_node(offset[i][2])
             new_pos = graph.get_node(self.child_connector_node.name).attr['pos'].strip("!").split(",")
             new_pos = float(new_pos[0]), float(new_pos[1])
             connection.add_to_map(network, graph, (new_pos[0] + offset[i][0] * network.internal_spacing, new_pos[1] + offset[i][1] * network.y_spacing*1.3), offset[i][2])
@@ -142,7 +162,7 @@ class NetworkItem:
             connection.add_edges(network, graph)
 
 
-    def set_connector_node(self, dir = "down") -> "NetworkItem":
+    def set_connector_node(self, dir = "south") -> "NetworkItem":
         if self.connector_node is None:
             self.connector_node: Optional["NetworkItem"] = self
         return self.connector_node
@@ -164,42 +184,42 @@ class NetworkDevice(NetworkItem):
     offsets = {
         'Internet' : {
             0: [],
-            1: [(0, -1, 'down')], 
-            2: [(-1, 0, 'left'), (1, 0, 'right')],
-            3: [(-1, 0, 'left'), (0, -1, 'down'), (1, 0, 'right')],
-            4: [(-1, 0, 'left'), (-1, -1, 'left'), (1, 0, 'right'), (1, -1, 'right')]
+            1: [(0, -1, "south")], 
+            2: [(-1, 0, "west"), (1, 0, "east")],
+            3: [(-1, 0, "west"), (0, -1, "south"), (1, 0, "east")],
+            4: [(-1, 0, "west"), (-1, -1, "west"), (1, 0, "east"), (1, -1, "east")]
         },
         'Router': {
             0: [],
-            1: [(2, 0, 'right')], 
-            2: [(-2, 0, 'left'), (2, 0, 'right')],
-            3: [(-1, 0, 'left'), (0, -1, 'down'), (1, 0, 'right')],
-            4: [(-1, .5, 'left'), (-1, -1, 'down'), (1, .5, 'right'), (2, -1, 'down')]
+            1: [(2, 0, "east")], 
+            2: [(-2, 0, "west"), (2, 0, "east")],
+            3: [(-2, 0, "west"), (0, -1, "south"), (2, 0, "east")],
+            4: [(-1.25, 1, "west"), (-1.25, -1, "southwest"), (1.25, 1, "east"), (1.25, -1, "southeast")]
         },
-        'right' : {
+        "east" : {
             0: [],
-            1: [(1, 0, 'right')],
-            2: [(1, -.5, 'right'), (1, .5, 'right')],
-            3: [(1, -.5, 'right'), (1.5, 0, 'right'), (1, .5, 'right')],
+            1: [(1, 0, "east")],
+            2: [(1, -.5, "east"), (1, .5, "east")],
+            3: [(1, -.5, "east"), (1.5, 0, "east"), (1, .5, "east")],
         },
-        'left' : {
+        "west" : {
             0: [],
-            1: [(-1, 0, 'left')],
-            2: [(-1, -.5, 'left'), (-1, .5, 'left')],
-            3: [(-1, -.5, 'left'), (-1.5, 0, 'left'), (-1, .5, 'left')],
+            1: [(-1, 0, "west")],
+            2: [(-1, -.5, "west"), (-1, .5, "west")],
+            3: [(-1, -.5, "west"), (-1.5, 0, "west"), (-1, .5, "west")],
         },
         'Normal' :{
             0: [],
-            1: [(0, -1, 'down')],
-            2: [(-.5, -1, 'down'), (.5, -1, 'down')],
-            3: [(-.5, -1, 'down'), (0, -1, 'down'), (.5, -1, 'down')],
+            1: [(0, -1, "south")],
+            2: [(-.5, -1, "south"), (.5, -1, "south")],
+            3: [(-.5, -1, "south"), (0, -1, "south"), (.5, -1, "south")],
         },
-        'parent' : {
-            0: [],
-            1: [(0, 1, 'up')],
-            2: [(-.5, 1, 'up'), (.5, 1, 'up')],
-            3: [(-.5, 1, 'up'), (0, 1, 'up'), (.5, 1, 'up')],
-        }
+        # 'parent' : {
+        #     0: [],
+        #     1: [(0, 1, "north")],
+        #     2: [(-.5, 1, "north"), (.5, 1, "north")],
+        #     3: [(-.5, 1, "north"), (0, 1, "north"), (.5, 1, "north")],
+        # }
     }
 
     
@@ -262,10 +282,9 @@ class NetworkDevice(NetworkItem):
                        </TABLE>>'''
         
     
-    def add_to_map(self, network: 'Network', graph: 'pgv.AGraph', pos: tuple, dir: str ="right"):
+    def add_to_map(self, network: 'Network', graph: 'pgv.AGraph', pos: tuple, dir: str ="east"):
         if pos in network.positions:
-            print(f"Adding {self.name} to an already occupied position")
-
+            print(f"Adding {self.name} to already occupied position {pos}")
             assert(False)
         else:
             network.positions.add(pos)
@@ -287,10 +306,10 @@ class Cluster(NetworkItem):
     # endpoint is for clusters where devices are in different shapes
     offset = {
         0: [],
-        1: [(0, -1, "down")], 
-        2: [(-.5, -1, "left"), (.5, -1, "right")],
-        3: [(-.5, -1, "left"), (0, -1, "down"), (.5, -1, "right")],
-        4: [(-1, -1, "left"), (-.5, -1, "down"), (.5, -1, "down"), (1, -1, "right")],
+        1: [(0, -1, "south")], 
+        2: [(-.5, -1, "southwest"), (.5, -1, "southeast")],
+        3: [(-.5, -1, "southwest"), (0, -1, "south"), (.5, -1, "southeast")],
+        4: [(-1, -1, "southwest"), (-.5, -1, "south"), (.5, -1, "south"), (1, -1, "southeast")],
     }
 
     CLUSTER_DEFAULTS = {
@@ -309,6 +328,7 @@ class Cluster(NetworkItem):
         self.fontsize = kwargs.get('fontsize', defaults.get('fontsize', '12'))
         self.fontcolor = kwargs.get('fontcolor', defaults.get('fontcolor', 'black'))
         self.offset = kwargs.get('offset', defaults.get('offset', Cluster.offset))
+        self.display_name = kwargs.get('display_name', name)
         self.label = kwargs.get('label', None)
 
         self.properties = kwargs.get('properties', {})
@@ -325,24 +345,28 @@ class Cluster(NetworkItem):
     def graphviz_label(self) -> Optional[str]:
         """DRY - single place that defines how labels look"""
         if self.ip:
-            return f'{self.name} - {self.ip}'
+            return f'{self.display_name} - {self.ip}'
         else:
             return None
         
-    def add_to_map(self, network: 'Network', graph: 'pgv.AGraph', pos: tuple, dir: str ="down"):
+    def add_to_map(self, network: 'Network', graph: 'pgv.AGraph', pos: tuple, dir: str ="south"):
         subgraph = graph.add_subgraph(name=f'cluster_{self.name}')
         subgraph.graph_attr.update({
             'style': self.style,
             'fillcolor': self.fillcolor,
             'fontsize': self.fontsize
         })
-        
-        for i, node in enumerate(self.get_nodes()):
-            node.add_to_map(network, subgraph, (pos[0] + i * network.internal_spacing, pos[1]))
+        # if direction is west, add nodes going to the left, starting with the last node
+        nodes = self.get_nodes() if dir != "west" else self.get_nodes()[::-1]
+        for i, node in enumerate(nodes):
+            if dir != "west":
+                node.add_to_map(network, subgraph, (pos[0] + i * network.internal_spacing, pos[1]))
+            else:
+                node.add_to_map(network, subgraph, (pos[0] + i * network.internal_spacing - i * network.x_spacing, pos[1]))
         super().add_to_map(network, graph, pos, dir)
 
         if self.graphviz_label:
-            center:tuple[float, float] = self.get_center(graph)
+            center:tuple[float, float] = self.get_center(subgraph)
             graph.add_node(self.name+"_label",
                         label=self.graphviz_label,
                         shape='rectangle',  # Invisible node, just text
@@ -369,16 +393,15 @@ class Cluster(NetworkItem):
             right = graph.get_node(self.nodes[len(self.nodes) // 2].name).attr['pos'].strip("!").split(",")
             return (float(left[0]) + float(right[0])) / 2, (float(left[1]) + float(right[1])) / 2
    
-    def set_connector_node(self, dir="down") -> "NetworkItem":
+    def set_connector_node(self, dir="south") -> "NetworkItem":
         if self.connector_node:
             return self.connector_node
-        print(f"Direction is {dir}")
         # middle node
-        if dir == "down":
+        if dir == "south":
             self.connector_node = self.nodes[len(self.nodes) // 2]
-        elif dir =="left":
-            self.connector_node = self.nodes[len(self.nodes)-1]
-        elif dir =="right":
+        elif dir =="west":
+            self.connector_node = self.nodes[-1]
+        elif dir =="east":
             self.connector_node = self.nodes[0]
         else:
             self.connector_node = self.nodes[0]
@@ -567,12 +590,12 @@ class Network:
         # debug_before_after_layout(self.map, "After adding all nodes, before any edges")
 
         # # Add first edge
-        # self.map.add_edge('Internet', 'BorderRouter', taillabel='128.237.3.102')
+        
         # debug_before_after_layout(self.map, "After first edge, before layout")
 
         self.map.layout(prog='neato')
         # debug_before_after_layout(self.map, "After first edge, after layout")
-
+        self.map.add_edge('Internet', 'BorderRouter', taillabel=' 128.237.3.102 ')
         # # # Add second edge
         internet.add_edges(self, self.map)
         # self.map.add_edge('Firewall1', 'Switch', headlabel='172.16.0.1', taillabel='172.16.0.2')
