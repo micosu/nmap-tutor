@@ -90,13 +90,14 @@ class NetworkItem:
     }
 
 
-    def __init__(self, name, ip, type_, properties = {}):
+    def __init__(self, name, ip, type_, display_name: Optional[str] = None, properties = {}):
         self.connections: dict['NetworkItem', tuple[str, tuple[str, str]]] = {}
         self.name = name
         self.ip = ip
         self.type = type_
         self.properties = properties
         self.connector_node = None
+        self.display_name = display_name or name
 
     def connect_to(self, other_device: 'NetworkItem' , hierarchy:str = "child", labels: tuple[str, str] = ("", "")):
         """DRY way to create connections"""
@@ -132,20 +133,28 @@ class NetworkItem:
             if connection.name != "UserLocation":
                 connection.add_to_map(network, graph, (pos[0] + 0 * network.x_spacing, pos[1] + 1 * network.y_spacing), "north")
             else: 
+                print(f"For user location, direction is {dir}, sp x os pffset by {self.directions[dir][1][0][0]}, so instead of {pos[0]}, its {pos[0] - self.directions[dir][1][0][0] * .4 * network.x_spacing}")
                 connection.add_to_map(network, graph, (pos[0] - self.directions[dir][1][0][0] * .4 * network.x_spacing, pos[1] + 1 * network.y_spacing), "north")
             
 
         for i, connection in enumerate(self.same):
             (hier, labels) = self.connections[connection]
             print(f"Current Item: {self.name}, Going to {connection.name}, in direction {dir}, but offset is {dir_offset[i][2]}")
-            connection.add_to_map(network, graph, (pos[0] + dir_offset[i][0] * network.x_spacing, pos[1] + dir_offset[i][1] * network.y_spacing), dir_offset[i][2])
+            print(f"Current postion: {pos}")
+            if "text" not in connection.name:
+                connection.add_to_map(network, graph, (pos[0] + dir_offset[i][0] * network.x_spacing * .8, pos[1] + dir_offset[i][1] * network.y_spacing), dir_offset[i][2])
+            else:
+                print("OUTSIDE NAME IS ", self.outside_connector_node.name)
+                new_pos = graph.get_node(self.outside_connector_node.name).attr['pos'].strip("!").split(",")
+                new_pos = float(new_pos[0]), float(new_pos[1])
+                connection.add_to_map(network, graph, (new_pos[0] + dir_offset[i][0] * network.x_spacing * .3, new_pos[1] + dir_offset[i][1] * network.y_spacing), dir_offset[i][2])
             
 
         for i, connection in enumerate(self.children):
             (hier, labels) = self.connections[connection]
             new_pos = graph.get_node(self.child_connector_node.name).attr['pos'].strip("!").split(",")
             new_pos = float(new_pos[0]), float(new_pos[1])
-            connection.add_to_map(network, graph, (new_pos[0] + offset[i][0] * network.internal_spacing, new_pos[1] + offset[i][1] * network.y_spacing*1.3), offset[i][2])
+            connection.add_to_map(network, graph, (new_pos[0] + offset[i][0] * network.internal_spacing, new_pos[1] + offset[i][1] * network.y_spacing*1.2), offset[i][2])
     
     def add_edges(self, network: 'Network', graph: 'pgv.AGraph'):
         for connection in self.neighbors:
@@ -153,7 +162,8 @@ class NetworkItem:
             if self.name not in ["Internet"]:
                 # print(f"adding edge between {self.name} and {connection.name}")
                 if hier == "same":
-                    graph.add_edge(self.same_connector_node.name, connection.set_connector_node().name, taillabel = labels[0], headlabel=labels[1])
+                    if connection.name != "dmz_text":
+                        graph.add_edge(self.inside_connector_node.name, connection.set_connector_node().name, taillabel = labels[0], headlabel=labels[1])
                 elif hier == "above":
                     graph.add_edge(self.above_connector_node.name, connection.set_connector_node().name, taillabel = labels[0], headlabel=labels[1])
                 else:
@@ -168,7 +178,11 @@ class NetworkItem:
         return self.connector_node
 
     @property
-    def same_connector_node(self):
+    def inside_connector_node(self):
+        return self.connector_node
+    
+    @property
+    def outside_connector_node(self):
         return self.connector_node
     
     @property
@@ -194,7 +208,7 @@ class NetworkDevice(NetworkItem):
             1: [(2, 0, "east")], 
             2: [(-2, 0, "west"), (2, 0, "east")],
             3: [(-2, 0, "west"), (0, -1, "south"), (2, 0, "east")],
-            4: [(-1.25, 1, "west"), (-1.25, -1, "southwest"), (1.25, 1, "east"), (1.25, -1, "southeast")]
+            4: [(-1.25, 1, "west"), (1.25, 1, "east"), (-1.25, -1, "southwest"), (1.25, -1, "southeast")]
         },
         "east" : {
             0: [],
@@ -227,18 +241,18 @@ class NetworkDevice(NetworkItem):
     DEVICE_DEFAULTS = {
         "Internet": {"symbol": "☁", "fillcolor": "lightblue", "fontcolor": "black", "shape": "ellipse", "style":"filled", "offset": offsets['Internet']},
         "Router": {"symbol": "📡", "fillcolor": "lightblue", "fontcolor": "black", "shape": "cylinder", "offset": offsets["Router"]},
-        "Switch": {"symbol": "🔀", "fillcolor": "none", "fontcolor": "white", "shape": 'none', "offset": offsets["Normal"]},
-        "Controller": {"symbol": "🖥", "fillcolor": "none", "fontcolor": "white", "shape": 'none', "offset": offsets["Normal"]},
-        "Firewall": {"symbol": "🛡", "fillcolor": "lightgrey", "fontcolor": "black","shape": "square", "style":"filled", "offset": offsets["Normal"]},
-        "Server": {"symbol": "🗄️", "fillcolor": "none", "fontcolor": "white", "width": "1", "shape": 'none', "offset": offsets["Normal"]},
-        "Workstation": {"symbol": "💻", "fillcolor": "lightblue", "fontcolor": "black", "offset": offsets["Normal"]},
-        "User": {"symbol": "📍", "fillcolor": '#CCA4D3', "shape": "ellipse", "style": "filled", "offset": offsets["Normal"]}
+        "Switch": {"symbol": "🔀", "fillcolor": "none", "fontcolor": "white", "shape": 'none'},
+        "Controller": {"symbol": "🖥", "fillcolor": "none", "fontcolor": "white", "shape": 'none'},
+        "Firewall": {"symbol": "🛡", "fillcolor": "lightgrey", "fontcolor": "black","shape": "square", "style":"filled"},
+        "Server": {"symbol": "🗄️", "fillcolor": "none", "fontcolor": "white", "shape": 'none'},
+        "Workstation": {"symbol": "💻", "fillcolor": "lightblue", "fontcolor": "black"},
+        "User": {"symbol": "📍", "fillcolor": '#CCA4D3', "shape": "ellipse", "style": "filled"},
+        "Text": {"symbol": "🗒️","shape": "rectangle", "fillcolor": "none", "fontcolor": 'black', "fontsize": 12}
     }
     
     def __init__(self, name: str, device_type: str, ip: Optional[str] = None, display_name: Optional[str] = None, **kwargs):
         properties = kwargs.get('properties', {})
-        super().__init__(name, ip, type_ = "device", properties=properties)
-        self.display_name = display_name or name
+        super().__init__(name, ip, type_ = "device", display_name= display_name, properties=properties)
         self.device_type = device_type
         
         defaults = self.DEVICE_DEFAULTS.get(device_type, {})
@@ -249,6 +263,7 @@ class NetworkDevice(NetworkItem):
         self.shape = kwargs.get('shape', defaults.get('shape', 'box'))
         self.width = kwargs.get('width', defaults.get('width', '1'))
         self.style= kwargs.get('style', defaults.get('style', 'filled,rounded'))
+        self.fontsize= kwargs.get('fontsize', defaults.get('fontsize', 14))
         self.offset: dict[int, List[tuple[float, float, str]]] = kwargs.get('offset', defaults.get('offset', NetworkDevice.offsets["Normal"]))
         
         # Extra properties
@@ -269,15 +284,36 @@ class NetworkDevice(NetworkItem):
     @property
     def graphviz_label(self) -> str:
         """DRY - single place that defines how labels look"""
+        def wrap_text_by_words(text, max_width=15):
+            words = text.split()
+            lines = []
+            current_line = ""
+
+            for word in words:
+                # If adding the next word exceeds max_width, start a new line
+                if len(current_line) + len(word) + (1 if current_line else 0) > max_width:
+                    lines.append(current_line)
+                    current_line = word
+                else:
+                    # Add space if line not empty
+                    current_line += (" " if current_line else "") + word
+
+            # Append last line
+            if current_line:
+                lines.append(current_line)
+
+            # Join lines with <BR/>
+            return "<BR/>".join(lines)
+        display= wrap_text_by_words(self.display_name)
         if self.ip:
             return f'''<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="5">
-                        <TR><TD>{self.display_name}</TD></TR>
+                        <TR><TD><FONT POINT-SIZE="{self.fontsize}">{self.display_name}</FONT></TD></TR>
                          <TR><TD><FONT POINT-SIZE="30">{self.symbol}</FONT></TD></TR>
-                         <TR><TD><FONT POINT-SIZE="10">{self.ip}</FONT></TD></TR>
+                         <TR><TD><FONT POINT-SIZE="14">{self.ip}</FONT></TD></TR>
                        </TABLE>>'''
         else:
             return f'''<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="5">
-                        <TR><TD>{self.display_name}</TD></TR>
+                        <TR><TD><FONT POINT-SIZE="{self.fontsize}">{display}</FONT></TD></TR>
                         <TR><TD><FONT POINT-SIZE="30">{self.symbol}</FONT></TD></TR>  
                        </TABLE>>'''
         
@@ -317,8 +353,8 @@ class Cluster(NetworkItem):
         "endpoint": {'style': 'filled,rounded', 'fillcolor': 'lightblue', 'fontsize': '10','offset': offset},
     }
 
-    def __init__(self, nodes: list['NetworkDevice'], cluster_type: str, name: str, ip: Optional[str] = None, **kwargs):
-        super().__init__(name, ip, type_="cluster")
+    def __init__(self, nodes: list['NetworkDevice'], cluster_type: str, name: str, ip: Optional[str] = None, display_name: Optional[str] = None, **kwargs):
+        super().__init__(name, ip, type_="cluster", display_name= display_name)
         self.nodes = nodes
         self.cluster_type = cluster_type
         defaults = self.CLUSTER_DEFAULTS.get(cluster_type, {})
@@ -328,7 +364,6 @@ class Cluster(NetworkItem):
         self.fontsize = kwargs.get('fontsize', defaults.get('fontsize', '12'))
         self.fontcolor = kwargs.get('fontcolor', defaults.get('fontcolor', 'black'))
         self.offset = kwargs.get('offset', defaults.get('offset', Cluster.offset))
-        self.display_name = kwargs.get('display_name', name)
         self.label = kwargs.get('label', None)
 
         self.properties = kwargs.get('properties', {})
@@ -358,11 +393,14 @@ class Cluster(NetworkItem):
         })
         # if direction is west, add nodes going to the left, starting with the last node
         nodes = self.get_nodes() if dir != "west" else self.get_nodes()[::-1]
+        position = pos
         for i, node in enumerate(nodes):
             if dir != "west":
-                node.add_to_map(network, subgraph, (pos[0] + i * network.internal_spacing, pos[1]))
+                position = (pos[0] + i * network.internal_spacing, pos[1])
             else:
-                node.add_to_map(network, subgraph, (pos[0] + i * network.internal_spacing - i * network.x_spacing, pos[1]))
+                position = (pos[0] + i * network.internal_spacing - i * network.x_spacing, pos[1])
+            node.add_to_map(network, subgraph, position)
+        # print(f"Original position to put {self.name}'s nodes: {pos};  Final position of node: {position}")
         super().add_to_map(network, graph, pos, dir)
 
         if self.graphviz_label:
@@ -372,7 +410,7 @@ class Cluster(NetworkItem):
                         shape='rectangle',  # Invisible node, just text
                         style='filled,rounded',
                         color='lightblue',
-                        fontsize='12',
+                        fontsize='14',
                         pos=f'{center[0]},{center[1] + network.internal_spacing/1.5}!') 
             
     def __str__(self):
@@ -393,7 +431,7 @@ class Cluster(NetworkItem):
             right = graph.get_node(self.nodes[len(self.nodes) // 2].name).attr['pos'].strip("!").split(",")
             return (float(left[0]) + float(right[0])) / 2, (float(left[1]) + float(right[1])) / 2
    
-    def set_connector_node(self, dir="south") -> "NetworkItem":
+    def set_connector_node(self, dir="south") -> "NetworkDevice":
         if self.connector_node:
             return self.connector_node
         # middle node
@@ -411,6 +449,22 @@ class Cluster(NetworkItem):
     @property
     def child_connector_node(self):
         return self.nodes[len(self.nodes) // 2]
+    
+    @property
+    def outside_connector_node(self):
+        if self.connector_node:
+            inside_ind = self.nodes.index(self.connector_node)
+            if inside_ind == len(self.nodes) - 1:
+                return self.nodes[0]
+            elif inside_ind == 0:
+                return self.nodes[-1]
+            else:
+                return self.connector_node
+            
+        raise NetworkError(f"Node {self.name} does not have a connector node yet")
+
+
+
     
 
 
@@ -445,16 +499,6 @@ class Network:
         
         self.items[item.name] = item
         return item
-    
-    def add_items(self, items: List[NetworkItem]) -> None:
-        new_items: Dict[str, NetworkItem] = {}
-        for item in items:
-            if item.name in self.items:
-                raise ValueError(f"Item '{item.name}' already exists")
-            
-            new_items[item.name] = item
-        
-        self.items = new_items
 
     def add_items_from_config(self, item_configs: list[dict]) -> dict[str, 'NetworkItem']:
         """
@@ -509,6 +553,15 @@ class Network:
                     node.connect_to(self.get_item(neighbor[0]), neighbor[1], neighbor[2])
 
     
+    def remove_items(self, items: list['NetworkItem']):
+        for item in items:
+            if item.name not in self.items:
+                raise ValueError(f"Item '{item.name}' does not exist")
+            self.items.pop(item.name)
+
+
+
+    
     def get_item(self, name: str):
         return self.items[name]
 
@@ -529,38 +582,48 @@ class Network:
     def used_ips(self):
         network_ips: set[str] = set()
         for item in self.items.values():
-            if item.ip:
+            if item.type == "device" and item.ip:
                 network_ips.add(item.ip)
 
         return network_ips
+    
     @property
-    def all_ips(self):
-        # IP address -> device_type, ip_type
-        network_ips: list[dict] = []
+    def systems(self):
+        all_systems: list['NetworkItem'] = list()
         for item in self.items.values():
-            if item.ip:
-                network_ips.append({
-                    'ip_address': item.ip,
-                    'device_type': item.type, 
-                    'ip_type': "device"
-                })
+            if item.type == "device" and item.ip:
+                all_systems.append(item)
 
-            for neighbor, (hier, ips) in item.connections.items():
-                if len(ips) > 0 and ips[0] != "":
-                    network_ips.append({
-                    'ip_address': ips[0],
-                    'device_type': item.type, 
-                    'ip_type': "interface"
-                })
+        return all_systems
+    
+    # @property
+    # def all_ips(self):
+    #     # IP address -> device_type, ip_type
+    #     network_ips: list[dict] = []
+    #     for item in self.items.values():
+    #         if item.ip:
+    #             network_ips.append({
+    #                 'ip_address': item.ip,
+    #                 'device_type': item.type, 
+    #                 'ip_type': "device"
+    #             })
 
-                if len(ips) > 1 and ips[1] != "":
-                    network_ips.append({
-                    'ip_address': ips[1],
-                    'device_type': neighbor.type, 
-                    'ip_type': "interface"
-                })
+    #         for neighbor, (hier, ips) in item.connections.items():
+    #             if len(ips) > 0 and ips[0] != "":
+    #                 network_ips.append({
+    #                 'ip_address': ips[0],
+    #                 'device_type': item.type, 
+    #                 'ip_type': "interface"
+    #             })
 
-        return network_ips
+    #             if len(ips) > 1 and ips[1] != "":
+    #                 network_ips.append({
+    #                 'ip_address': ips[1],
+    #                 'device_type': neighbor.type, 
+    #                 'ip_type': "interface"
+    #             })
+
+    #     return network_ips
 
     def generate_map(self, output_name: str = "network") -> str:
         """Generate Graphviz diagram - single method does it all"""
@@ -579,12 +642,12 @@ class Network:
             'mode': 'major'
         })
 
-        self.map.graph_attr.update(
-    nodesep='0.8',          # Fixed horizontal spacing
-    ranksep='1.2',          # Fixed vertical spacing
-    ordering='out',         # Better edge ordering
-    concentrate='true'      # Merge similar edges
-)
+        # self.map.graph_attr.update(
+        #     nodesep='0.8',          # Fixed horizontal spacing
+        #     ranksep='1.2',          # Fixed vertical spacing
+        #     ordering='out',         # Better edge ordering
+        #     concentrate='true'      # Merge similar edges
+        # )
 
         self.map.node_attr.update({
             'fontname': 'Arial',
