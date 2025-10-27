@@ -142,8 +142,8 @@ class NetworkItem:
             print(f"Current Item: {self.name}, Going to {connection.name}, in direction {dir}, but offset is {dir_offset[i][2]}")
             print(f"Current postion: {pos}")
             if "text" not in connection.name:
-                connection.add_to_map(network, graph, (pos[0] + dir_offset[i][0] * network.x_spacing * .8, pos[1] + dir_offset[i][1] * network.y_spacing), dir_offset[i][2])
-            else:
+                connection.add_to_map(network, graph, (pos[0] + dir_offset[i][0] * network.x_spacing * .9, pos[1] + dir_offset[i][1] * network.y_spacing), dir_offset[i][2])
+            else:          
                 print("OUTSIDE NAME IS ", self.outside_connector_node.name)
                 new_pos = graph.get_node(self.outside_connector_node.name).attr['pos'].strip("!").split(",")
                 new_pos = float(new_pos[0]), float(new_pos[1])
@@ -162,7 +162,7 @@ class NetworkItem:
             if self.name not in ["Internet"]:
                 # print(f"adding edge between {self.name} and {connection.name}")
                 if hier == "same":
-                    if connection.name != "dmz_text":
+                    if not connection.name.startswith("dmz_text"):
                         graph.add_edge(self.inside_connector_node.name, connection.set_connector_node().name, taillabel = labels[0], headlabel=labels[1])
                 elif hier == "above":
                     graph.add_edge(self.above_connector_node.name, connection.set_connector_node().name, taillabel = labels[0], headlabel=labels[1])
@@ -205,23 +205,23 @@ class NetworkDevice(NetworkItem):
         },
         'Router': {
             0: [],
-            1: [(2, 0, "east")], 
-            2: [(-2, 0, "west"), (2, 0, "east")],
-            3: [(-2, 0, "west"), (0, -1, "south"), (2, 0, "east")],
+            1: [(1.75, 0, "east")], 
+            2: [(-1.75, 0, "west"), (1.75, 0, "east")],
+            3: [(-1.75, 0, "west"), (0, -1, "south"), (1.75, 0, "east")],
             4: [(-1.25, 1, "west"), (1.25, 1, "east"), (-1.25, -1, "southwest"), (1.25, -1, "southeast")]
         },
-        "east" : {
-            0: [],
-            1: [(1, 0, "east")],
-            2: [(1, -.5, "east"), (1, .5, "east")],
-            3: [(1, -.5, "east"), (1.5, 0, "east"), (1, .5, "east")],
-        },
-        "west" : {
-            0: [],
-            1: [(-1, 0, "west")],
-            2: [(-1, -.5, "west"), (-1, .5, "west")],
-            3: [(-1, -.5, "west"), (-1.5, 0, "west"), (-1, .5, "west")],
-        },
+        # "east" : {
+        #     0: [],
+        #     1: [(1, 0, "east")],
+        #     2: [(1, -.5, "east"), (1, .5, "east")],
+        #     3: [(1, -.5, "east"), (1.5, 0, "east"), (1, .5, "east")],
+        # },
+        # "west" : {
+        #     0: [],
+        #     1: [(-1, 0, "west")],
+        #     2: [(-1, -.5, "west"), (-1, .5, "west")],
+        #     3: [(-1, -.5, "west"), (-1.5, 0, "west"), (-1, .5, "west")],
+        # },
         'Normal' :{
             0: [],
             1: [(0, -1, "south")],
@@ -591,7 +591,7 @@ class Network:
     def systems(self):
         all_systems: list['NetworkItem'] = list()
         for item in self.items.values():
-            if item.type == "device" and item.ip:
+            if item.type == "device" and item.ip and item.device_type == "Workstation":
                 all_systems.append(item)
 
         return all_systems
@@ -625,7 +625,7 @@ class Network:
 
     #     return network_ips
 
-    def generate_map(self, output_name: str = "network") -> str:
+    def generate_map(self, output_name: str = "network", folder: str ="") -> str:
         """Generate Graphviz diagram - single method does it all"""
         self._validate_network()
 
@@ -671,8 +671,10 @@ class Network:
         internet.add_edges(self, self.map)
         # self.map.add_edge('Firewall1', 'Switch', headlabel='172.16.0.1', taillabel='172.16.0.2')
         # debug_before_after_layout(self.map, "After second edge, before layout")
-
-        self.map.draw( f"{output_name}.png", format='png')
+        if folder != "":
+            self.map.draw( f"{folder}/{output_name}.png", format='png')
+        else:
+            self.map.draw( f"{output_name}.png", format='png')
         # print("PyGraphviz network diagram created with neato!")
         # Add all connections
         return f"{output_name}.png"
@@ -692,7 +694,6 @@ class Network:
         server_list = list()
         for item in self.items.values():
             if isinstance(item, NetworkDevice):
-
                 if item.device_type == "Server":
                     server_list.append(item)
         return server_list
