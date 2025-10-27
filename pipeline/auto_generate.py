@@ -74,6 +74,7 @@ def pipeline(prob_type: str, **kwargs):
     q_type: str = kwargs.get("q_type", "normal")
     neighbors = kwargs.get('neighbors', True)
     folder: str = kwargs.get("folder", "exampleFiles")
+    print("folederrrrr: ", folder)
     images_folder: str = kwargs.get("images_folder", "images")
     cidr_blocks = generate_random_cidrs(subnets, neighbors)
     print("Cidr Blocks:", cidr_blocks)
@@ -128,7 +129,9 @@ if __name__ == "__main__":
     parser.add_argument("--prob_type", type=str, required=True)
     parser.add_argument("--subnets", type=int, required=True)
     parser.add_argument("--q_type", type=str, required=False, default="normal")
+    parser.add_argument("--folder", type=str, required=False, default="exampleFiles")
+    parser.add_argument("--image_folder", type=str, required=False, default="images")
 
     args = parser.parse_args()
     print(args)
-    pipeline(prob_type=args.prob_type, subnets=args.subnets, q_type= args.q_type)
+    pipeline(prob_type=args.prob_type, subnets=args.subnets, q_type= args.q_type, folder=args.folder, image_folder=args.image_folder)

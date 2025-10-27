@@ -1,5 +1,6 @@
 from typing import Optional, List, Dict, Any
 import pygraphviz as pgv
+from pathlib import Path
 
 class NetworkError(Exception):
     pass
@@ -671,10 +672,10 @@ class Network:
         internet.add_edges(self, self.map)
         # self.map.add_edge('Firewall1', 'Switch', headlabel='172.16.0.1', taillabel='172.16.0.2')
         # debug_before_after_layout(self.map, "After second edge, before layout")
-        if folder != "":
-            self.map.draw( f"{folder}/{output_name}.png", format='png')
-        else:
-            self.map.draw( f"{output_name}.png", format='png')
+        filepath = f"{folder}/{output_name}.png" if folder else f"{output_name}.png"
+        if folder:
+            Path(folder).mkdir(parents=True, exist_ok=True)
+        self.map.draw(filepath, format='png')
         # print("PyGraphviz network diagram created with neato!")
         # Add all connections
         return f"{output_name}.png"
