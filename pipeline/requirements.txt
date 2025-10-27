@@ -1,0 +1,3 @@
+graphviz==0.21
+netaddr==1.3.0
+pygraphviz==1.14
