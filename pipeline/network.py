@@ -247,6 +247,9 @@ class NetworkDevice(NetworkItem):
         "Firewall": {"symbol": "🛡", "fillcolor": "lightgrey", "fontcolor": "black","shape": "square", "style":"filled"},
         "Server": {"symbol": "🗄️", "fillcolor": "none", "fontcolor": "white", "shape": 'none'},
         "Workstation": {"symbol": "💻", "fillcolor": "lightblue", "fontcolor": "black"},
+        "Printer": {"symbol": "🖨️", "fillcolor": "lightblue", "fontcolor": "black"},
+        "Camera": {"symbol": "📷", "fillcolor": "lightblue", "fontcolor": "black"},
+        "Thermostat": {"symbol": "🌡️", "fillcolor": "lightblue", "fontcolor": "black"},
         "User": {"symbol": "📍", "fillcolor": '#CCA4D3', "shape": "ellipse", "style": "filled"},
         "Text": {"symbol": "🗒️","shape": "rectangle", "fillcolor": "none", "fontcolor": 'black', "fontsize": 12}
     }
@@ -592,7 +595,7 @@ class Network:
     def systems(self):
         all_systems: list['NetworkItem'] = list()
         for item in self.items.values():
-            if item.type == "device" and item.ip and item.device_type == "Workstation":
+            if item.type == "device" and item.ip and item.device_type == "Workstation" and "User" not in item.display_name :
                 all_systems.append(item)
 
         return all_systems
@@ -707,24 +710,24 @@ class Network:
 
 if __name__ == "__main__":
     # Generate example network
-    network = Network("TrialNetwork", y_spacing=.666, x_spacing=1, internal_spacing=.5)
+    network = Network("TrialNetwork", x_spacing= .5, y_spacing= .3333, internal_spacing=.25)
     devices = network.add_items_from_config([
         {'type': 'device', 'name': 'Internet', 'device_type': 'Internet'},
         {'type': 'device', 'name': 'BorderRouter', 'device_type': 'Router'},
         {'type': 'device', 'name': 'UserLocation', 'device_type': 'User', 'display_name': 'You are connected here'},
         {'type': 'device', 'name': 'Firewall1', 'device_type': 'Firewall'},
         {'type': 'cluster', 'name': 'switch', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'Switch', 'device_type': 'Switch'}]},
-        {'type': 'cluster', 'name': 'Office', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'DomainController', 'device_type': 'Controller', 'ip': '172.16.9.10', 'display_name': 'Domain Controller'}], 'ip': '172.16.0.0/12'},
-        {'type': 'cluster', 'name': 'ClusterWorkstation1', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation1', 'device_type': 'Workstation', 'ip': '172.16.31.101', 'display_name': 'User Workstation 1'}]},
-        {'type': 'cluster', 'name': 'ClusterWorkstation2', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation2', 'device_type': 'Workstation', 'ip': '172.16.31.102', 'display_name': 'User Workstation 2'}]},
-        {'type': 'cluster', 'name': 'ClusterWorkstation3', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation3', 'device_type': 'Workstation', 'ip': '172.16.31.103', 'display_name': 'User Workstation 3'}]},
+        {'type': 'cluster', 'name': 'Office', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'DomainController', 'device_type': 'Controller', 'ip': '172.20.0.20', 'display_name': 'Domain Controller'}], 'ip': '172.20.0.0/15'},
+        {'type': 'cluster', 'name': 'ClusterWorkstation1', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation1', 'device_type': 'Workstation', 'ip': '172.20.0.100', 'display_name': 'User Workstation'}]},
+        {'type': 'cluster', 'name': 'ClusterWorkstation2', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation2', 'device_type': 'Camera', 'ip': '172.20.0.101', 'display_name': 'Security Camera'}]},
+        {'type': 'cluster', 'name': 'ClusterWorkstation3', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation3', 'device_type': 'Thermostat', 'ip': '172.20.0.102', 'display_name': 'Smart Thermostat'}]},
     ])
 
     network.connect_items_from_config({
         "Internet": [("BorderRouter", "child", (' 128.237.3.102 ',""))],
-        "BorderRouter": [("Firewall1", "child", ("  172.16.0.1  ", "  172.16.0.2  "))],
-        "Firewall1": [("switch", "same", ("  172.16.0.3  ", ""))],
-        "switch": [("UserLocation", "same", ("", "  172.16.5.5  ")), ("Office", "above"), ("ClusterWorkstation1",), ("ClusterWorkstation2",), ("ClusterWorkstation3",)]
+        "BorderRouter": [("Firewall1", "child", ("  172.20.0.1  ", "  172.20.0.2  "))],
+        "Firewall1": [("switch", "same", ("  172.20.0.3  ", ""))],
+        "switch": [("UserLocation", "same", ("", "  172.20.0.5  ")), ("Office", "above"), ("ClusterWorkstation1",), ("ClusterWorkstation2",), ("ClusterWorkstation3",)]
     })
 
-    network.generate_map("one_subnet")
+    network.generate_map("networkmap4")

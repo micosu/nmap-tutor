@@ -450,7 +450,7 @@ class WorkstationProblem(Problem):
 
             offset = random.randint(40, 100)
             
-            for j in range(random.randint(2, 4)):
+            for j in range(random.randint(2, 3)):
                 # On even subnets, add services. On odd subnets, add workstations
                 ip_address = net[offset+j]
                 if i % 2 == 0:
@@ -571,8 +571,9 @@ class UnresponsiveWorkstations(WorkstationProblem):
 
 
         systems = self.network.systems
+        print("SYSTEMSSSSS___--------", systems)
 
-        unresponsive = random.sample(systems, random.randint(2, 4))
+        unresponsive = random.sample(systems, random.randint(2, len(systems)))
         self.network.remove_items(unresponsive)
         left_answer = [item.ip for item in unresponsive]
         right_answer = [item.display_name for item in unresponsive]
