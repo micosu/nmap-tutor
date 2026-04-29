@@ -133,19 +133,19 @@ class Problem():
             if "connections" in item:
                 connections[item["name"]] = item["connections"]
 
-        print("Connections: ", connections)
+        # print("Connections: ", connections)
         map_rep.connect_items_from_config(connections)
 
         return map_rep
     
     def gen_map(self, img_name: Optional[str] = None) -> None:
-        print("A map is being generated")
+        # print("A map is being generated")
         if not img_name and self.q_type == "normal":
             img_name = self.__class__.__name__ + "_" + str(self.subnets)
         elif not img_name:
             img_name = self.__class__.__name__ + "_" + self.q_type + '_' + str(self.subnets)
 
-        print(img_name)
+        # print(img_name)
         self.img_name = self.network.generate_map(f"{img_name}", folder=self.folder + "/" + self.images_folder)
     
     def get_answer_defaults(self) -> dict:
@@ -362,7 +362,7 @@ class BadPorts(Problem):
         ws_count:int = len(workstations)
         
         bad_ws = random.randint(1, min(ws_count, 4))
-        print("COUNTS", ws_count, bad_ws)
+        # print("COUNTS", ws_count, bad_ws)
         shuffled_ws = random.sample(workstations, bad_ws)
         left_answer = []
         right_answer = []
@@ -417,7 +417,7 @@ class WorkstationProblem(Problem):
 
             dmz = get_baseline(item_type = "cluster", name=f'DMZ_{i}', cluster_type='intermediate', ip= str(net), display_name= dmz_names[i],
                                 nodes= [get_baseline(item_type="device", name= f'Server_{server_count + j + 1}', device_type="Server", ip= f'{net[20 + j]}', display_name= list(self.servers_ports.keys())[server_count + j]) for j in range(3)])
-            print("DMZ LOOKS LIKE: ", dmz)
+            # print("DMZ LOOKS LIKE: ", dmz)
             if not self.show_names:
                 for node in dmz["nodes"]:
                     
@@ -571,7 +571,7 @@ class UnresponsiveWorkstations(WorkstationProblem):
 
 
         systems = self.network.systems
-        print("SYSTEMSSSSS___--------", systems)
+        # print("SYSTEMSSSSS___--------", systems)
 
         unresponsive = random.sample(systems, random.randint(2, len(systems)))
         self.network.remove_items(unresponsive)

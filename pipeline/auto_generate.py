@@ -74,10 +74,9 @@ def pipeline(prob_type: str, **kwargs):
     q_type: str = kwargs.get("q_type", "normal")
     neighbors = kwargs.get('neighbors', True)
     folder: str = kwargs.get("folder", "exampleFiles")
-    print("folederrrrr: ", folder)
     images_folder: str = kwargs.get("images_folder", "images")
     cidr_blocks = generate_random_cidrs(subnets, neighbors)
-    print("Cidr Blocks:", cidr_blocks)
+    # print("Cidr Blocks:", cidr_blocks)
 
     prob_types: dict[str, type['Problem']] = {
         "Bad Ports": BadPorts,
@@ -93,23 +92,24 @@ def pipeline(prob_type: str, **kwargs):
         return
     problem = problem_class(cidr_blocks, subnets, q_type=q_type, folder=folder, images_folder=images_folder)
     config = problem.config
-    print(config)
-    print("Generating Network")
-    network = problem.network
+    # print("Config")
+    # print(config)
+    # print("Generating Network")
+    # network = problem.network
 
-    print("Generating Map")
+    # print("Generating Map")
     problem.gen_map()
 
     answers = problem.gen_answers()
-    print("Answers: ", answers)
+    # print("Answers: ", answers)
 
 
     example_data = problem.gen_example_data()
-    print("Example Data: ", example_data)
+    # print("Example Data: ", example_data)
 
     # print("Generating Problem Dictionary")
     problem_dict = problem.set_problem_dict(prob_number=2)
-    print(problem_dict)
+    # print(problem_dict)
 
     problem.gen_nools_file()
     print("Problem file Generated Successfully")
@@ -133,5 +133,4 @@ if __name__ == "__main__":
     parser.add_argument("--image_folder", type=str, required=False, default="images")
 
     args = parser.parse_args()
-    print(args)
     pipeline(prob_type=args.prob_type, subnets=args.subnets, q_type= args.q_type, folder=args.folder, image_folder=args.image_folder)

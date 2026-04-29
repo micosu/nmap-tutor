@@ -5,29 +5,6 @@ from pathlib import Path
 class NetworkError(Exception):
     pass
 
-def debug_before_after_layout(graph, stage=""):
-    """Check node visual properties before and after layout"""
-    print(f"\n=== {stage} ===")
-    
-    # Check actual rendered positions and sizes
-    try:
-        internet = graph.get_node('Internet')
-        print(f"Internet - pos: {internet.attr.get('pos')}, width: {internet.attr.get('width')}")
-        print(f"Internet - height: {internet.attr.get('height')}, shape: {internet.attr.get('shape')}")
-        
-        # Check if layout has added any new attributes
-        all_attrs = dict(internet.attr)
-        layout_attrs = {k:v for k,v in all_attrs.items() if k not in ['label', 'shape', 'style', 'fillcolor', 'fontcolor', 'width']}
-        if layout_attrs:
-            print(f"Layout-added attributes: {layout_attrs}")
-            
-    except Exception as e:
-        print(f"Error getting node info: {e}")
-    
-    # Check graph-level attributes that affect rendering
-    print(f"Graph bb: {graph.graph_attr.get('bb', 'Not set')}")
-    print(f"Graph size: {graph.graph_attr.get('size', 'Not set')}")
-    print(f"Graph dpi: {graph.graph_attr.get('dpi', 'Not set')}")
 
 class NetworkItem:
     # If it is a central node (e.g. Internet), neighbors should be placed below it
@@ -134,14 +111,14 @@ class NetworkItem:
             if connection.name != "UserLocation":
                 connection.add_to_map(network, graph, (pos[0] + 0 * network.x_spacing, pos[1] + 1 * network.y_spacing), "north")
             else: 
-                print(f"For user location, direction is {dir}, sp x os pffset by {self.directions[dir][1][0][0]}, so instead of {pos[0]}, its {pos[0] - self.directions[dir][1][0][0] * .4 * network.x_spacing}")
+                # print(f"For user location, direction is {dir}, sp x os pffset by {self.directions[dir][1][0][0]}, so instead of {pos[0]}, its {pos[0] - self.directions[dir][1][0][0] * .4 * network.x_spacing}")
                 connection.add_to_map(network, graph, (pos[0] - self.directions[dir][1][0][0] * .4 * network.x_spacing, pos[1] + 1 * network.y_spacing), "north")
             
 
         for i, connection in enumerate(self.same):
             (hier, labels) = self.connections[connection]
-            print(f"Current Item: {self.name}, Going to {connection.name}, in direction {dir}, but offset is {dir_offset[i][2]}")
-            print(f"Current postion: {pos}")
+            # print(f"Current Item: {self.name}, Going to {connection.name}, in direction {dir}, but offset is {dir_offset[i][2]}")
+            # print(f"Current postion: {pos}")
             if "text" not in connection.name:
                 connection.add_to_map(network, graph, (pos[0] + dir_offset[i][0] * network.x_spacing * .9, pos[1] + dir_offset[i][1] * network.y_spacing), dir_offset[i][2])
             else:          
@@ -245,7 +222,7 @@ class NetworkDevice(NetworkItem):
         "Switch": {"symbol": "🔀", "fillcolor": "none", "fontcolor": "white", "shape": 'none'},
         "Controller": {"symbol": "🖥", "fillcolor": "none", "fontcolor": "white", "shape": 'none'},
         "Firewall": {"symbol": "🛡", "fillcolor": "lightgrey", "fontcolor": "black","shape": "square", "style":"filled"},
-        "Server": {"symbol": "🗄️", "fillcolor": "none", "fontcolor": "white", "shape": 'none'},
+        "Server": {"symbol": "🗄️", "fillcolor": "none", "fontcolor": "black", "shape": 'none'},
         "Workstation": {"symbol": "💻", "fillcolor": "lightblue", "fontcolor": "black"},
         "Printer": {"symbol": "🖨️", "fillcolor": "lightblue", "fontcolor": "black"},
         "Camera": {"symbol": "📷", "fillcolor": "lightblue", "fontcolor": "black"},
@@ -269,9 +246,6 @@ class NetworkDevice(NetworkItem):
         self.style= kwargs.get('style', defaults.get('style', 'filled,rounded'))
         self.fontsize= kwargs.get('fontsize', defaults.get('fontsize', 14))
         self.offset: dict[int, List[tuple[float, float, str]]] = kwargs.get('offset', defaults.get('offset', NetworkDevice.offsets["Normal"]))
-        
-        # Extra properties
-        
         
         # Validate on creation
         self._validate()
@@ -426,7 +400,7 @@ class Cluster(NetworkItem):
     def get_center(self, graph):
         # if it's odd, return position of center node
         # if it's even, average positions of center nodes
-        print("Self nodes length: ", len(self.nodes))
+        # print("Self nodes length: ", len(self.nodes))
         if len(self.nodes) % 2 != 0:
             center = graph.get_node(self.nodes[len(self.nodes) // 2].name).attr['pos'].strip("!").split(",")
             return float(center[0]), float(center[1])
@@ -468,14 +442,9 @@ class Cluster(NetworkItem):
         raise NetworkError(f"Node {self.name} does not have a connector node yet")
 
 
-
-    
-
-
 class Network:
     """Container for the entire network - keeps everything organized"""
-
-    def __init__(self, name: str = "Network", x_spacing: float = 1, y_spacing: float = .666, internal_spacing: float= .5):
+    def __init__(self, name: str = "Network", x_spacing: float = .5, y_spacing: float =1/3, internal_spacing: float= .25):
         """
         Layout looks best if ratio of x_spacing : y_spacing is 3 : 2 and
         ration of x_spacing : internal_spacing is 2 : 1
@@ -562,9 +531,6 @@ class Network:
             if item.name not in self.items:
                 raise ValueError(f"Item '{item.name}' does not exist")
             self.items.pop(item.name)
-
-
-
     
     def get_item(self, name: str):
         return self.items[name]
@@ -599,35 +565,6 @@ class Network:
                 all_systems.append(item)
 
         return all_systems
-    
-    # @property
-    # def all_ips(self):
-    #     # IP address -> device_type, ip_type
-    #     network_ips: list[dict] = []
-    #     for item in self.items.values():
-    #         if item.ip:
-    #             network_ips.append({
-    #                 'ip_address': item.ip,
-    #                 'device_type': item.type, 
-    #                 'ip_type': "device"
-    #             })
-
-    #         for neighbor, (hier, ips) in item.connections.items():
-    #             if len(ips) > 0 and ips[0] != "":
-    #                 network_ips.append({
-    #                 'ip_address': ips[0],
-    #                 'device_type': item.type, 
-    #                 'ip_type': "interface"
-    #             })
-
-    #             if len(ips) > 1 and ips[1] != "":
-    #                 network_ips.append({
-    #                 'ip_address': ips[1],
-    #                 'device_type': neighbor.type, 
-    #                 'ip_type': "interface"
-    #             })
-
-    #     return network_ips
 
     def generate_map(self, output_name: str = "network", folder: str ="") -> str:
         """Generate Graphviz diagram - single method does it all"""
@@ -646,12 +583,6 @@ class Network:
             'mode': 'major'
         })
 
-        # self.map.graph_attr.update(
-        #     nodesep='0.8',          # Fixed horizontal spacing
-        #     ranksep='1.2',          # Fixed vertical spacing
-        #     ordering='out',         # Better edge ordering
-        #     concentrate='true'      # Merge similar edges
-        # )
 
         self.map.node_attr.update({
             'fontname': 'Arial',
@@ -661,25 +592,17 @@ class Network:
         # Add all edges + postions (DFS)
         internet = self.get_item("Internet")
         internet.add_to_map(self, self.map, (0, 0))
-        
-        # debug_before_after_layout(self.map, "After adding all nodes, before any edges")
-
-        # # Add first edge
-        
-        # debug_before_after_layout(self.map, "After first edge, before layout")
 
         self.map.layout(prog='neato')
-        # debug_before_after_layout(self.map, "After first edge, after layout")
         self.map.add_edge('Internet', 'BorderRouter', taillabel=' 128.237.3.102 ')
         # # # Add second edge
         internet.add_edges(self, self.map)
-        # self.map.add_edge('Firewall1', 'Switch', headlabel='172.16.0.1', taillabel='172.16.0.2')
-        # debug_before_after_layout(self.map, "After second edge, before layout")
+
         filepath = f"{folder}/{output_name}.png" if folder else f"{output_name}.png"
         if folder:
             Path(folder).mkdir(parents=True, exist_ok=True)
         self.map.draw(filepath, format='png')
-        # print("PyGraphviz network diagram created with neato!")
+
         # Add all connections
         return f"{output_name}.png"
     
@@ -710,24 +633,28 @@ class Network:
 
 if __name__ == "__main__":
     # Generate example network
-    network = Network("TrialNetwork", x_spacing= .5, y_spacing= .3333, internal_spacing=.25)
+    network = Network("TrialNetwork")
+
+    # Change IP addresses of individual devices here
     devices = network.add_items_from_config([
         {'type': 'device', 'name': 'Internet', 'device_type': 'Internet'},
         {'type': 'device', 'name': 'BorderRouter', 'device_type': 'Router'},
         {'type': 'device', 'name': 'UserLocation', 'device_type': 'User', 'display_name': 'You are connected here'},
         {'type': 'device', 'name': 'Firewall1', 'device_type': 'Firewall'},
         {'type': 'cluster', 'name': 'switch', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'Switch', 'device_type': 'Switch'}]},
-        {'type': 'cluster', 'name': 'Office', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'DomainController', 'device_type': 'Controller', 'ip': '172.20.0.20', 'display_name': 'Domain Controller'}], 'ip': '172.20.0.0/15'},
-        {'type': 'cluster', 'name': 'ClusterWorkstation1', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation1', 'device_type': 'Workstation', 'ip': '172.20.0.100', 'display_name': 'User Workstation'}]},
-        {'type': 'cluster', 'name': 'ClusterWorkstation2', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation2', 'device_type': 'Camera', 'ip': '172.20.0.101', 'display_name': 'Security Camera'}]},
-        {'type': 'cluster', 'name': 'ClusterWorkstation3', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation3', 'device_type': 'Thermostat', 'ip': '172.20.0.102', 'display_name': 'Smart Thermostat'}]},
+        {'type': 'cluster', 'name': 'Office', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'DomainController', 'device_type': 'Controller', 'ip': '192.16.0.20', 'display_name': 'Domain Controller'}], 'ip': '192.16.0.0/24'},
+        {'type': 'cluster', 'name': 'ClusterWorkstation1', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation1', 'device_type': 'Server', 'ip': '192.16.0.100', 'display_name': 'Server'}]},
+        {'type': 'cluster', 'name': 'ClusterWorkstation2', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation2', 'device_type': 'Printer', 'ip': '192.16.0.101', 'display_name': 'User Workstation'}]},
+        {'type': 'cluster', 'name': 'ClusterWorkstation3', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation3', 'device_type': 'Camera', 'ip': '192.16.0.102', 'display_name': 'Camera'}]},
     ])
 
+    # Change IP addresses of individual edges here
     network.connect_items_from_config({
         "Internet": [("BorderRouter", "child", (' 128.237.3.102 ',""))],
-        "BorderRouter": [("Firewall1", "child", ("  172.20.0.1  ", "  172.20.0.2  "))],
-        "Firewall1": [("switch", "same", ("  172.20.0.3  ", ""))],
-        "switch": [("UserLocation", "same", ("", "  172.20.0.5  ")), ("Office", "above"), ("ClusterWorkstation1",), ("ClusterWorkstation2",), ("ClusterWorkstation3",)]
+        "BorderRouter": [("Firewall1", "child", ("  192.16.0.1  ", "  192.16.0.2  "))],
+        "Firewall1": [("switch", "same", ("  192.16.0.3  ", ""))],
+        "switch": [("UserLocation", "same", ("", "  192.16.0.5  ")), ("Office", "above"), ("ClusterWorkstation1",), ("ClusterWorkstation2",), ("ClusterWorkstation3",)]
     })
 
-    network.generate_map("networkmap4")
+    # Change file name here
+    network.generate_map("subnet_posttest")
