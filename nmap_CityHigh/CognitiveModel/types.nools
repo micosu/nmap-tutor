@@ -1,0 +1,225 @@
+//Skill fact definition
+define Skill {
+  name: null,
+  category: null,
+  constructor: function(n, c) {
+    this.name = n;
+    this.category = c;
+  }
+}
+
+define Problem {
+
+  fixLeft: null,
+  oneColumn: null,
+  
+  firstAttemptCorrect: 0, // 0 initial, 1 correct, -1 incorrect
+  secondAttemptCorrect: 0,
+  firstAttemptDone: false,
+  fullcommand: null, 
+    
+  sudo: null,
+  nmap: null, 
+  scanType: null, 
+  scanTypeFlag: null, 
+  portSpecification: null, 
+  ipAddress: null, 
+
+  iesudo: null,
+  ienmap: null, 
+  iescanType: null, 
+  iescanTypeFlag: null, 
+  ieportSpecification: null, 
+  ieipAddress: null, 
+  
+	leftColumn: null,
+  rightColumn: null,
+  leftAnswerList: null,
+  rightAnswerList: null,
+
+  leftEntered: [],
+  rightEntered:[],
+  pairsByLeft: null,
+    
+	constructor: function(l,r,la,ra,fl,oc, fullcommand, sudo, nmap, scanType,scanTypeFlag,portSpecification,ipAddress) {
+
+    	this.leftColumn= l;
+    	this.rightColumn= r;
+      this.leftAnswerList= la;
+    	this.rightAnswerList= ra;
+      this.fixLeft = fl;
+      this.oneColumn = oc;
+    
+      this.iesudo= sudo;
+      this.ienmap= nmap; 
+      this.iescanType= scanType;
+      this.iescanTypeFlag= scanTypeFlag; 
+      this.ieportSpecification= portSpecification;
+      this.ieipAddress= ipAddress;
+      this.pairsByLeft = {}; // additional variable to map left answer to right answer
+      if (!oc) {
+        for (var i = 0; i < la.length; i++) this.pairsByLeft[la[i]] = ra[i];
+      }
+	}
+}
+
+define InterfaceElement {
+  name: null,
+	value: null,
+	constructor: function(n) {
+		this.name = n;
+	}
+}
+// We need facts in memory for the full nmap command, as well as each portion of the command. 
+// The facts need a "bypass" flag, so that correct command invocation marks them as complete. 
+
+define fullCommand { // Do they know how to invoke the full command to complete a scan? 
+  name: null,
+  value: null,
+  constructor: function(n,v) {
+    this.name = n;
+    this.value = v;
+  }
+}
+
+define sudoKC { // Do they know if they need to elevate privilages (and how to do so?)
+  name: null,
+  value: null,
+  constructor: function(n,v) {
+    this.name = n;
+    this.value = v;
+  }
+}
+
+define nmapKC  { // Do they know how to invoke the nmap command? 
+  name: null,
+  value: null,
+  constructor: function(n,v) {
+    this.name = n;
+    this.value = v;
+  }
+}
+
+define portsNeeded { // Do they know what ports need to be scanned? 
+  name: null,
+  values: [],
+  constructor: function(n,v) {
+    this.name = n;
+    this.value = v;
+  }
+}
+
+define portSpecification { // Do they know how to specify what ports to scan?
+  name: null,
+  values: null,
+  constructor: function(n,v) {
+    this.name = n;
+    this.value = v;
+  }
+}
+
+define scanType {  // Do they know what type of scan needs to be conducted? 
+  name: null,
+  value: null,
+  constructor: function(n,v) {
+    this.name = n;
+    this.value = v;
+  }
+}
+
+define scanTypeFlag { // Do they know the flag to specify the scan they want to do? 
+  name: null,
+  value: null,
+  constructor: function(n,v) {
+    this.name = n;
+    this.value = v;
+  }
+}
+
+define foundTargets {  // The targets the student has identified thus far. (1 to 4 possible target pairs)
+  name: null, 
+  targetlist: [], // Will be a list containing pairs of answers [ ["1.1.1.1", "workstation1"], ["2.2.2.2", "workstation2"], ["3.3.3.3", "workstation3"], ["4.4.4.4", "workstation4"] ]
+  constructor: function(n,v) {
+    this.name = n;
+    this.targetlist = v;
+  }  
+}
+
+
+define TextInput {
+	name: null,
+	value: null,
+	constructor: function(n, v) {
+		this.name = n;
+		this.value = v;
+	}
+}
+
+define box {
+	name: null,
+	value: null,
+	constructor: function(n, v) {
+		this.name = n;
+		this.value = v;
+	}
+}
+
+define row {
+	left: null,
+	right: null,
+  l_value:null,
+  r_value:null,
+	constructor: function(l, r,vl,vr) {
+		this.left = l;
+		this.right = r;
+    this.l_value = vl;
+    this.r_value = vr;
+	}
+}
+
+define pair {
+	left: null,
+	right: null,
+	constructor: function(l, r) {
+		this.left = l;
+		this.right = r;
+	}
+}
+
+
+// ----- types needed by the model tracer, no need to edit these ----
+define StudentValues {
+	selection: null,
+	action: null,
+	input: null,
+	constructor: function(s,a,i) {
+		this.selection = s;
+		this.action = a;
+		this.input = i;
+	}
+}
+
+define TPA {
+	selection: null,
+	action: null,
+	input: null,
+	constructor: function(s, a, i) {
+		this.selection = s;
+		this.action = a;
+		this.input = i;
+	}
+}
+
+define Hint {
+	precedence: 0,
+	msg: "",
+	constructor: function(m, optPrecedence) {
+		this.msg = m;
+		this.precedence = optPrecedence || 0;
+	}
+}
+
+define IsHintMatch {
+	constructor: function() {
+	}
+}

@@ -1,0 +1,53 @@
+global skill_definitions = [
+  {	
+		skillName: "sudo",
+		category: "nmapScanning",
+		opportunities: 2,
+		label: "Privilege Elevation",
+    description: "When and how to escalate privilages for command execution."
+	},
+  {	
+		skillName: "nmapCommand",
+		category: "nmapScanning",
+		opportunities: 2,
+		label: "nmap Command",
+    description: "How to run the nmap command (regardless of configuration)"
+	},
+  {		
+		skillName: "scanType",
+		category: "nmapScanning",
+		opportunities: 2,
+		label: "Identify Scan Type",
+    description: "Identifying the correct type of scan."
+	},
+  {		
+		skillName: "scanTypeFlag",
+		category: "nmapScanning",
+		opportunities: 2,
+		label: "Set Scan Type",
+    description: "Use the correct flag to specify the type of scan."
+	},
+  {		
+		skillName: "portSpecification",
+		category: "nmapScanning",
+		opportunities: 2,
+		label: "Set ports to scan",
+    description: "Use the correct flag and values to specify which ports to scan."
+	},
+  {		
+		skillName: "rangeSpecification",
+		category: "nmapScanning",
+		opportunities: 2,
+		label: "Set addresses to scan",
+    description: "Use the correct specification to specify which IP addresses to scan."
+	},
+  {		
+		skillName: "resultAnalysis",
+		category: "nmapScanning",
+		opportunities: 2,
+		label: "Scan Result Analysis",
+    description: "Correctly interpret scan results and compare to provided documentation to draw conclusions."
+	}
+];
+
+// To assert the skill, just: assert(new Skill("Skill Name", "skill Category"));

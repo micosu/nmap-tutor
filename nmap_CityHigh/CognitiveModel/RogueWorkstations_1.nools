@@ -1,0 +1,27 @@
+import("productionRules-final.nools");
+import("SkillDefinitions.nools");
+
+global probType = "Rogue Workstations";
+global fixLeft = false;
+global oneColumn = true;
+global probtxt = "<strong>Scan the entire DMZ with one nmap command.</strong> Identify any unaccounted for machines on our corporate networks. The firewalls are configured to allow ICMP echo requests through.";
+global title = "Tutor: NMAP problem 2";
+global opQuestion = "Based on the output, list any rogue workstation IPs below:";
+global leftTitle = "IP Address";
+global rightTitle = "";
+global imgAddress = "Assets/RogueWorkstations_1.png";
+
+global sudoAnswer = ["sudo"];
+global nmapAnswer = ["nmap"];
+global scanAnswer = ["-sn", "-PE", ""];
+global portsAnswer = [""];
+global pRangeAnswer = [""];
+global pFlagAnswer = [""];
+global outputAnswer = ["-oN", ""];
+global pingAnswer = [""];
+global ipAnswer = ["10.109.0.0/16"];
+
+global leftAnswer = ["10.109.0.26", "10.109.0.65"];
+global rightAnswer = [];
+
+global exampledata = [{IP: "10.109.0.1", Latency: "0.092", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "10.109.0.3", Latency: "0.095", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "10.109.0.5", Latency: "0.095", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "10.109.0.20", Latency: "0.048", PortsClosed: "", PortsFiltered: "", PortsOpen: "80 443"}, {IP: "10.109.0.21", Latency: "0.06", PortsClosed: "", PortsFiltered: "", PortsOpen: "25 465 587 2525"}, {IP: "10.109.0.22", Latency: "0.06", PortsClosed: "", PortsFiltered: "", PortsOpen: "53"}, {IP: "10.109.0.26", Latency: "0.033", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "10.109.0.62", Latency: "0.047", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "10.109.0.63", Latency: "0.025", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "10.109.0.65", Latency: "0.033", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "128.237.3.102", Latency: "0.018", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}];

@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package label="nmap_CityHigh" description="Version of nmap tutor used in study for City High in Fall 2025. The original package is nmap-0314, but it has been copied over and only the relevant files were retained" save_state="true">
+  <Problems>
+    <Problem name="BadPorts_1net" label="Badports 1net" tutor_flag="tutor" model_file="CognitiveModel/BadPorts_1.nools" student_interface="HTML/interface(1).html">
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" occurrences="2"/>
+        <Skill name="nmapCommand" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanType" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" occurrences="2"/>
+        <Skill name="portSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="rangeSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="resultAnalysis" category="nmapScanning" occurrences="2"/>
+      </Skills>
+    </Problem>
+    <Problem name="BadPorts_2net" label="Badports 2net" tutor_flag="tutor" model_file="CognitiveModel/BadPorts_2.nools" student_interface="HTML/interface(1).html">
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" occurrences="2"/>
+        <Skill name="nmapCommand" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanType" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" occurrences="2"/>
+        <Skill name="portSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="rangeSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="resultAnalysis" category="nmapScanning" occurrences="2"/>
+      </Skills>
+    </Problem>
+    <Problem name="ConsentForm" label="Consentform" tutor_flag="test" model_file="FinalBRDs/consent-form.brd" student_interface="HTML/consent-form.html">
+      <Skills>
+      </Skills>
+    </Problem>
+    <Problem name="IdentifyServices_1net" label="Identifyservices 1net" tutor_flag="tutor" model_file="CognitiveModel/IdentifyServices_1.nools" student_interface="HTML/interface(1).html">
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" occurrences="2"/>
+        <Skill name="nmapCommand" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanType" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" occurrences="2"/>
+        <Skill name="portSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="rangeSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="resultAnalysis" category="nmapScanning" occurrences="2"/>
+      </Skills>
+    </Problem>
+    <Problem name="IdentifyServices_2net" label="Identifyservices 2net" tutor_flag="tutor" model_file="CognitiveModel/IdentifyServices_2.nools" student_interface="HTML/interface(1).html">
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" occurrences="2"/>
+        <Skill name="nmapCommand" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanType" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" occurrences="2"/>
+        <Skill name="portSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="rangeSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="resultAnalysis" category="nmapScanning" occurrences="2"/>
+      </Skills>
+    </Problem>
+    <Problem name="Post-Test 1" label="Post-Test 1" tutor_flag="tutor" model_file="CognitiveModel/IdentifyServices_posttest_2.nools" student_interface="HTML/interface_test.html">
+      <Skills>
+      </Skills>
+    </Problem>
+    <Problem name="Post-Test 2" label="Post-Test 2" tutor_flag="tutor" model_file="CognitiveModel/UnresponsiveWorkstations_posttest_2.nools" student_interface="HTML/interface_test.html">
+      <Skills>
+      </Skills>
+    </Problem>
+    <Problem name="PreTest1" label="Pretest1" tutor_flag="tutor" model_file="CognitiveModel/BadPorts_pretest_2.nools" student_interface="HTML/interface_test.html">
+      <Skills>
+      </Skills>
+    </Problem>
+    <Problem name="pretest2" label="Pretest2" tutor_flag="tutor" model_file="CognitiveModel/RogueWorkstations_pretest_2.nools" student_interface="HTML/interface_test.html">
+      <Skills>
+      </Skills>
+    </Problem>
+    <Problem name="Rogue4" label="Rogue4" tutor_flag="tutor" model_file="CognitiveModel/RogueWorkstations_4.nools" student_interface="HTML/interface(1).html">
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" occurrences="2"/>
+        <Skill name="nmapCommand" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanType" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" occurrences="2"/>
+        <Skill name="portSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="rangeSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="resultAnalysis" category="nmapScanning" occurrences="2"/>
+      </Skills>
+    </Problem>
+    <Problem name="RogueWorkstations_1net" label="Rogueworkstations 1net" tutor_flag="tutor" model_file="CognitiveModel/RogueWorkstations_1.nools" student_interface="HTML/interface(1).html">
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" occurrences="2"/>
+        <Skill name="nmapCommand" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanType" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" occurrences="2"/>
+        <Skill name="portSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="rangeSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="resultAnalysis" category="nmapScanning" occurrences="2"/>
+      </Skills>
+    </Problem>
+    <Problem name="RogueWorkstations_2net" label="Rogueworkstations 2net" tutor_flag="tutor" model_file="CognitiveModel/RogueWorkstations_2.nools" student_interface="HTML/interface(1).html">
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" occurrences="2"/>
+        <Skill name="nmapCommand" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanType" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" occurrences="2"/>
+        <Skill name="portSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="rangeSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="resultAnalysis" category="nmapScanning" occurrences="2"/>
+      </Skills>
+    </Problem>
+    <Problem name="Unresponsive Workstations 1net" label="UnresponsiveWorkstations_1net" tutor_flag="tutor" model_file="CognitiveModel/UnresponsiveWorkstations_1.nools" student_interface="HTML/interface(1).html">
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" occurrences="2"/>
+        <Skill name="nmapCommand" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanType" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" occurrences="2"/>
+        <Skill name="portSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="rangeSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="resultAnalysis" category="nmapScanning" occurrences="2"/>
+      </Skills>
+    </Problem>
+    <Problem name="UnresponsiveWorkstations_2net" label="Unresponsiveworkstations 2net" tutor_flag="tutor" model_file="CognitiveModel/UnresponsiveWorkstations_2.nools" student_interface="HTML/interface(1).html">
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" occurrences="2"/>
+        <Skill name="nmapCommand" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanType" category="nmapScanning" occurrences="2"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" occurrences="2"/>
+        <Skill name="portSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="rangeSpecification" category="nmapScanning" occurrences="2"/>
+        <Skill name="resultAnalysis" category="nmapScanning" occurrences="2"/>
+      </Skills>
+    </Problem>
+  </Problems>
+  <ProblemSets>
+    <ProblemSet name="Auto-Generated Questions" label="Auto-generated questions" status="active" image_height="0" team_size="1" selection_algorithm="sequential" max_count="1000" max_repeat="1" initial_sequence="0">
+      <Problems>
+        <Problem name="BadPorts_1net" position="1" role="0"/>
+        <Problem name="BadPorts_2net" position="2" role="0"/>
+        <Problem name="IdentifyServices_1net" position="3" role="0"/>
+        <Problem name="IdentifyServices_2net" position="4" role="0"/>
+        <Problem name="Post-Test 1" position="5" role="0"/>
+        <Problem name="Post-Test 2" position="6" role="0"/>
+        <Problem name="PreTest1" position="7" role="0"/>
+        <Problem name="pretest2" position="8" role="0"/>
+        <Problem name="Rogue4" position="9" role="0"/>
+        <Problem name="RogueWorkstations_1net" position="10" role="0"/>
+        <Problem name="RogueWorkstations_2net" position="11" role="0"/>
+        <Problem name="UnresponsiveWorkstations_2net" position="12" role="0"/>
+      </Problems>
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" label="Privilege Elevation" description="When and how to escalate privilages for command execution." position="1" removed="false"/>
+        <Skill name="nmapCommand" category="nmapScanning" label="nmap Command" description="How to run the nmap command (regardless of configuration)" position="2" removed="false"/>
+        <Skill name="scanType" category="nmapScanning" label="Identify Scan Type" description="Identifying the correct type of scan." position="3" removed="false"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" label="Set Scan Type" description="Use the correct flag to specify the type of scan." position="4" removed="false"/>
+        <Skill name="portSpecification" category="nmapScanning" label="Set ports to scan" description="Use the correct flag and values to specify which ports to scan." position="5" removed="false"/>
+        <Skill name="rangeSpecification" category="nmapScanning" label="Set addresses to scan" description="Use the correct specification to specify which IP addresses to scan." position="6" removed="false"/>
+        <Skill name="resultAnalysis" category="nmapScanning" label="Scan Result Analysis" description="Correctly interpret scan results and compare to provided documentation to draw conclusions." position="7" removed="false"/>
+      </Skills>
+      <Categories>
+        <Collection name="general" label="Released Problem Sets" description="Released Problem Sets"/>
+        <Standard name="CommonCore" label="Common Core Standards" description="Common Core Standards" standard_level="standard"/>
+        <Standard name="NCTM" label="NCTM Curriculum Focal Points" description="NCTM Curriculum Focal Points" standard_level="standard"/>
+        <Standard name="PA" label="PA Assessment Anchors" description="PA Assessment Anchors" standard_level="standard"/>
+        <Standard name="Student" label="Problem Set Categories" description="Student Standards" standard_level="standard"/>
+      </Categories>
+    </ProblemSet>
+    <ProblemSet name="mm" label="mm" status="active" image_height="0" team_size="1" selection_algorithm="sequential" max_count="1000" max_repeat="1" initial_sequence="0">
+      <Problems>
+      </Problems>
+      <Skills>
+      </Skills>
+      <Categories>
+        <Collection name="general" label="Released Problem Sets" description="Released Problem Sets"/>
+        <Standard name="CommonCore" label="Common Core Standards" description="Common Core Standards" standard_level="standard"/>
+        <Standard name="NCTM" label="NCTM Curriculum Focal Points" description="NCTM Curriculum Focal Points" standard_level="standard"/>
+        <Standard name="PA" label="PA Assessment Anchors" description="PA Assessment Anchors" standard_level="standard"/>
+        <Standard name="Student" label="Problem Set Categories" description="Student Standards" standard_level="standard"/>
+      </Categories>
+    </ProblemSet>
+    <ProblemSet name="Nmap part H" label="Nmap part H" status="active" image_height="0" team_size="1" selection_algorithm="sequential" max_count="1000" max_repeat="1" initial_sequence="0">
+      <Problems>
+        <Problem name="BadPorts_1net" position="1" role="0"/>
+        <Problem name="IdentifyServices_2net" position="2" role="0"/>
+        <Problem name="RogueWorkstations_1net" position="3" role="0"/>
+        <Problem name="UnresponsiveWorkstations_2net" position="4" role="0"/>
+      </Problems>
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" label="Privilege Elevation" description="When and how to escalate privilages for command execution." position="1" removed="false"/>
+        <Skill name="nmapCommand" category="nmapScanning" label="nmap Command" description="How to run the nmap command (regardless of configuration)" position="2" removed="false"/>
+        <Skill name="scanType" category="nmapScanning" label="Identify Scan Type" description="Identifying the correct type of scan." position="3" removed="false"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" label="Set Scan Type" description="Use the correct flag to specify the type of scan." position="4" removed="false"/>
+        <Skill name="portSpecification" category="nmapScanning" label="Set ports to scan" description="Use the correct flag and values to specify which ports to scan." position="5" removed="false"/>
+        <Skill name="rangeSpecification" category="nmapScanning" label="Set addresses to scan" description="Use the correct specification to specify which IP addresses to scan." position="6" removed="false"/>
+        <Skill name="resultAnalysis" category="nmapScanning" label="Scan Result Analysis" description="Correctly interpret scan results and compare to provided documentation to draw conclusions." position="7" removed="false"/>
+      </Skills>
+      <Categories>
+        <Collection name="general" label="Released Problem Sets" description="Released Problem Sets"/>
+        <Standard name="CommonCore" label="Common Core Standards" description="Common Core Standards" standard_level="standard"/>
+        <Standard name="NCTM" label="NCTM Curriculum Focal Points" description="NCTM Curriculum Focal Points" standard_level="standard"/>
+        <Standard name="PA" label="PA Assessment Anchors" description="PA Assessment Anchors" standard_level="standard"/>
+        <Standard name="Student" label="Problem Set Categories" description="Student Standards" standard_level="standard"/>
+      </Categories>
+    </ProblemSet>
+    <ProblemSet name="Nmap part I" label="Nmap part I" status="active" image_height="0" team_size="1" selection_algorithm="sequential" max_count="1000" max_repeat="1" initial_sequence="0">
+      <Problems>
+        <Problem name="BadPorts_2net" position="1" role="0"/>
+        <Problem name="IdentifyServices_1net" position="2" role="0"/>
+        <Problem name="RogueWorkstations_2net" position="3" role="0"/>
+        <Problem name="Unresponsive Workstations 1net" position="4" role="0"/>
+      </Problems>
+      <Skills>
+        <Skill name="sudo" category="nmapScanning" label="Privilege Elevation" description="When and how to escalate privilages for command execution." position="1" removed="false"/>
+        <Skill name="nmapCommand" category="nmapScanning" label="nmap Command" description="How to run the nmap command (regardless of configuration)" position="2" removed="false"/>
+        <Skill name="scanType" category="nmapScanning" label="Identify Scan Type" description="Identifying the correct type of scan." position="3" removed="false"/>
+        <Skill name="scanTypeFlag" category="nmapScanning" label="Set Scan Type" description="Use the correct flag to specify the type of scan." position="4" removed="false"/>
+        <Skill name="portSpecification" category="nmapScanning" label="Set ports to scan" description="Use the correct flag and values to specify which ports to scan." position="5" removed="false"/>
+        <Skill name="rangeSpecification" category="nmapScanning" label="Set addresses to scan" description="Use the correct specification to specify which IP addresses to scan." position="6" removed="false"/>
+        <Skill name="resultAnalysis" category="nmapScanning" label="Scan Result Analysis" description="Correctly interpret scan results and compare to provided documentation to draw conclusions." position="7" removed="false"/>
+      </Skills>
+      <Categories>
+        <Collection name="general" label="Released Problem Sets" description="Released Problem Sets"/>
+        <Standard name="CommonCore" label="Common Core Standards" description="Common Core Standards" standard_level="standard"/>
+        <Standard name="NCTM" label="NCTM Curriculum Focal Points" description="NCTM Curriculum Focal Points" standard_level="standard"/>
+        <Standard name="PA" label="PA Assessment Anchors" description="PA Assessment Anchors" standard_level="standard"/>
+        <Standard name="Student" label="Problem Set Categories" description="Student Standards" standard_level="standard"/>
+      </Categories>
+    </ProblemSet>
+    <ProblemSet name="Nmap Test J" label="Nmap Test J" description="version J of nmap tests" status="active" image_height="0" team_size="1" selection_algorithm="sequential" max_count="1000" max_repeat="1" initial_sequence="0">
+      <Problems>
+        <Problem name="PreTest1" position="1" role="0"/>
+        <Problem name="pretest2" position="2" role="0"/>
+      </Problems>
+      <Skills>
+      </Skills>
+      <Categories>
+        <Collection name="general" label="Released Problem Sets" description="Released Problem Sets"/>
+        <Standard name="CommonCore" label="Common Core Standards" description="Common Core Standards" standard_level="standard"/>
+        <Standard name="NCTM" label="NCTM Curriculum Focal Points" description="NCTM Curriculum Focal Points" standard_level="standard"/>
+        <Standard name="PA" label="PA Assessment Anchors" description="PA Assessment Anchors" standard_level="standard"/>
+        <Standard name="Student" label="Problem Set Categories" description="Student Standards" standard_level="standard"/>
+      </Categories>
+    </ProblemSet>
+    <ProblemSet name="Nmap Test K" label="Nmap Test K" description="version K of the nmap test" status="active" image_height="0" team_size="1" selection_algorithm="sequential" max_count="1000" max_repeat="1" initial_sequence="0">
+      <Problems>
+        <Problem name="Post-Test 1" position="1" role="0"/>
+        <Problem name="Post-Test 2" position="2" role="0"/>
+      </Problems>
+      <Skills>
+      </Skills>
+      <Categories>
+        <Collection name="general" label="Released Problem Sets" description="Released Problem Sets"/>
+        <Standard name="CommonCore" label="Common Core Standards" description="Common Core Standards" standard_level="standard"/>
+        <Standard name="NCTM" label="NCTM Curriculum Focal Points" description="NCTM Curriculum Focal Points" standard_level="standard"/>
+        <Standard name="PA" label="PA Assessment Anchors" description="PA Assessment Anchors" standard_level="standard"/>
+        <Standard name="Student" label="Problem Set Categories" description="Student Standards" standard_level="standard"/>
+      </Categories>
+    </ProblemSet>
+    <ProblemSet name="StudentAssent" label="StudentAssent" status="active" image_height="0" team_size="1" selection_algorithm="sequential" max_count="1000" max_repeat="1" initial_sequence="0">
+      <Problems>
+        <Problem name="ConsentForm" position="1" role="0"/>
+      </Problems>
+      <Skills>
+      </Skills>
+      <Categories>
+        <Collection name="general" label="Released Problem Sets" description="Released Problem Sets"/>
+        <Standard name="CommonCore" label="Common Core Standards" description="Common Core Standards" standard_level="standard"/>
+        <Standard name="NCTM" label="NCTM Curriculum Focal Points" description="NCTM Curriculum Focal Points" standard_level="standard"/>
+        <Standard name="PA" label="PA Assessment Anchors" description="PA Assessment Anchors" standard_level="standard"/>
+        <Standard name="Student" label="Problem Set Categories" description="Student Standards" standard_level="standard"/>
+      </Categories>
+    </ProblemSet>
+  </ProblemSets>
+  <Assets>
+    <Asset name="nmap_CityHigh" path=".." asset_type="directory"/>
+    <Asset name="CognitiveModel" asset_type="directory"/>
+    <Asset name="BadPorts_1.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="BadPorts_2.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="BadPorts_pretest_2.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="control-problem3.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="control-problem4.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="IdentifyServices_1.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="IdentifyServices_2.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="IdentifyServices_posttest_2.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="m" path="CognitiveModel" asset_type="file"/>
+    <Asset name="problem1.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="problem2.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="problem2(2)-js.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="problem3.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="problem4.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="problem5.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="productionRules-bottom-out-hint-only.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="productionRules-final.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="productionRules-test.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="productionRules.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="productionRulesBeta-js.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="RogueWorkstations_1.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="RogueWorkstations_2.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="RogueWorkstations_4.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="RogueWorkstations_pretest_2.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="SkillDefinitions.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="types.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="UnresponsiveWorkstations_1.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="UnresponsiveWorkstations_2.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="UnresponsiveWorkstations_posttest_2.nools" path="CognitiveModel" asset_type="file"/>
+    <Asset name="FinalBRDs" asset_type="directory"/>
+    <Asset name="CognitiveModel_FinalBRDs_consent-form (1).brd" path="FinalBRDs" asset_type="file"/>
+    <Asset name="consent-form.brd" path="FinalBRDs" asset_type="file"/>
+    <Asset name="control_1.brd" path="FinalBRDs" asset_type="file"/>
+    <Asset name="control_2.brd" path="FinalBRDs" asset_type="file"/>
+    <Asset name="control_3.brd" path="FinalBRDs" asset_type="file"/>
+    <Asset name="new-pre-test-1.brd" path="FinalBRDs" asset_type="file"/>
+    <Asset name="new-pre-test-2.brd" path="FinalBRDs" asset_type="file"/>
+    <Asset name="new-zpost-test-3.brd" path="FinalBRDs" asset_type="file"/>
+    <Asset name="new-zpost-test-4.brd" path="FinalBRDs" asset_type="file"/>
+    <Asset name="x-pre-test-2.brd" path="FinalBRDs" asset_type="file"/>
+    <Asset name="HTML" asset_type="directory"/>
+    <Asset name="Assets" path="HTML" asset_type="directory"/>
+    <Asset name="BadPorts_1.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="BadPorts_2.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="BadPorts_pretest_2.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="final-interface-styles.css" path="HTML/Assets" asset_type="file"/>
+    <Asset name="IdentifyServices_1.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="IdentifyServices_2.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="IdentifyServices_posttest_2.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="interface-test-styles.css" path="HTML/Assets" asset_type="file"/>
+    <Asset name="RogueWorkstations_1.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="RogueWorkstations_2.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="RogueWorkstations_pretest_2.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="UnresponsiveWorkstations_1.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="UnresponsiveWorkstations_2.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="UnresponsiveWorkstations_posttest_2.png" path="HTML/Assets" asset_type="file"/>
+    <Asset name="consent-form.html" path="HTML" asset_type="file"/>
+    <Asset name="control_1.html" path="HTML" asset_type="file"/>
+    <Asset name="control_2.html" path="HTML" asset_type="file"/>
+    <Asset name="control_3.html" path="HTML" asset_type="file"/>
+    <Asset name="final_pretest_1.html" path="HTML" asset_type="file"/>
+    <Asset name="HTML_consent-form (1).html" path="HTML" asset_type="file"/>
+    <Asset name="interface_test.html" path="HTML" asset_type="file"/>
+    <Asset name="interface_zoomable.html" path="HTML" asset_type="file"/>
+    <Asset name="interface-js.html" path="HTML" asset_type="file"/>
+    <Asset name="interface.html" path="HTML" asset_type="file"/>
+    <Asset name="interface(1).html" path="HTML" asset_type="file"/>
+    <Asset name="x-pre-test-1.html" path="HTML" asset_type="file"/>
+    <Asset name="x-pre-test-2.html" path="HTML" asset_type="file"/>
+    <Asset name="z-post-test-3.html" path="HTML" asset_type="file"/>
+    <Asset name="z-post-test-4.html" path="HTML" asset_type="file"/>
+    <Asset name="NOWHERE" asset_type="directory"/>
+    <Asset name="control-problem2.nools" path="NOWHERE" asset_type="file"/>
+  </Assets>
+</Package>

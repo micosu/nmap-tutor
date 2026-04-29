@@ -1,0 +1,26 @@
+import("productionRules-final.nools");
+import("SkillDefinitions.nools");
+
+global probType = "Bad Ports";
+global fixLeft = false;
+global oneColumn = false;
+global probtxt = "We have received a DMCA complaint that someone is sharing copyrighted material from our corporate network via bittorrent. <br><strong>Conduct a scan with nmap to find out which workstation is responsible.</strong> ( Bittorrent is known to use TCP ports in the range <strong>6881 - 6889</strong> )";
+global title = "Tutor: NMAP problem 1";
+global opQuestion = "Based on the output, which workstations are responsible?";
+global leftTitle = "IP Address";
+global rightTitle = "Workstation Number";
+global imgAddress = "Assets/BadPorts_1.png";
+
+global sudoAnswer = ["sudo"];
+global nmapAnswer = ["nmap"];
+global scanAnswer = ["-sS", "-sT", ""];
+global pFlagAnswer = ["-p", "-pT"];
+global outputAnswer = ["-oN", ""];
+global pingAnswer = ["-Pn", ""];
+global portsAnswer = ["-p 6881-6889"];
+global ipAnswer = ["10.90.0.0/16"];
+
+global leftAnswer = ["10.90.0.73", "10.90.0.74"];
+global rightAnswer = ["1", "2"];
+
+global exampledata = [{IP: "10.90.0.1", Latency: "0.057", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "10.90.0.3", Latency: "0.013", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "10.90.0.5", Latency: "0.013", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "10.90.0.10", Latency: "0.089", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 88 135 139 389 443 445 464"}, {IP: "10.90.0.73", Latency: "0.043", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445 6886"}, {IP: "10.90.0.74", Latency: "0.011", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445 6884"}, {IP: "128.237.3.102", Latency: "0.032", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}];

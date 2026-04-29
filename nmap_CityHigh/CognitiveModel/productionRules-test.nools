@@ -1,0 +1,1043 @@
+import("types.nools");
+global scanResultSaver = "";
+// Copyright 2024 Rotem Guttman
+
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file of this repository or at: 
+// https://github.com/rotem-guttman/jscybersim-nmap/blob/main/LICENSE.md
+
+// This is a quick hacked together demo of how to generate lightweight nmap-style output in javascript. 
+// The intent is for this code to be used to dynamically generate nmap output that matches a problem set
+// in an intelligent tutor system (ITS). There is definately a lot of room for improvement, 
+// but this is functional enough for an initial prototype to user test with. 
+// If you do find this useful, please reach out! I'm always looking for collaborators.
+
+// Here we're going to convert the CSV into an actual object. If you're generating the network map dynamically then skip all this and just hand an object to createPortScanResults(). 
+// The object should be in the format of a list of objects (1 per IP'ed NIC). 
+// Each object should have the format: { IP: "address_string", Latency: "delay_in_seconds", PortsClosed: "space_separated_list_of_ports", PortsFiltered: "space_separated_list_of_ports", PortsOpen: "space_separated_list_of_ports" }
+
+// The only important attribute for correct formatting is setting white-space to pre, so that the output is spaced reasonably. 
+// You'll probably also want to give it a terminal-looking font and maybe a black background with white or text to contrast the element with the rest of the tutor. 
+// You could even give it a full console-looking UI, but that might be a distractor (great thing to test in a user study!)
+// const outputElement = document.getElementById("output"); 
+// outputElement.setAttribute('style', 'white-space: pre;');
+
+// Helper functions to bit-twiddle between integer and dotted-quad representation of IPs.
+function int2ip (ip) {
+    return ( (ip>>>24) +'.' + (ip>>16 & 255) +'.' + (ip>>8 & 255) +'.' + (ip & 255) );
+}
+function ip2int(ip) {
+    return ip.split('.').reduce(function(ipInt, octet) { return (ipInt<<8) + parseInt(octet, 10)}, 0) >>> 0;
+}
+
+//  Helper function to convert a mask into its related integer (taking into account that javascript uses 64 bits but acts like it's 32 bits when doing bit operations.
+function subnetMaskToNumber(mask)
+{
+  return (0xffffffff << (32 - Number(mask))) & 0xffffffff;
+}
+
+// I can't believe I'm writing this function, but it gets rid of the lodash dependency so here we are. 
+
+function makeRange(start, stop)
+{
+  var ret = [];
+  for (var i = start; i < stop; i++)
+    {
+      ret.push(i);
+    }
+  return ret;
+}
+
+
+// There are numerous ways that nmap supports inputting the target addresses. Unforunately we need to support a large subset of these in order to ensure that most reasonable student input will be accepted, even if the way the student decides to specify the list of addresses is not intuitive to us. 
+// Not only are the input options numerous, but they can be combined. As such, I repeatedly carve off the last item of the command line, and attempt to parse it as each option, then repeat, until no matching items are found. 
+// Currently the system supports:
+// * IPv4 addresses specified with:
+//   - Individual IP address specification 
+//   - CIDR address blocks
+//   - Start/Stop addresses ranges (specified with a hyphen between the fully specified addresses)
+//   - nmap's unique (as far as I know) use of a per-octet start-stop range. This can appear in any one of the four octets. Example: 1-2.3-4.5.7-10 
+function ListIPAddresses (commandString) {
+
+  // The list of addresses will be stored here until we're done and ready to return it. 
+  let addressList = [];
+
+  // Since we will be iteratively checking the last element in the input command, we need to check if it matches any of the formats. This regex should match all cases. It is anchored only at the END of the string, and will ignore the beginning - so you can pass in the entire nmap command, and it will ignore everything but the addresses.
+  // NOTE! You'll want to make sure you're stripping any trailing whitespace characters (like a newline) from the command, if your tutor captures that input from the student hitting enter on the command. 
+  var testAnyMatch = new RegExp(/(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\-(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$|(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\/([4-9]|(3[0-2]?)|(2[0-9]?)|(1[0-9]?)))?$|(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\-(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]))?\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\-(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]))?$/); 
+  let allAddresses = commandString.match(testAnyMatch);
+  
+  // Since we may be testing these more than once, lets create an actual regex object for each command type. 
+  // NOTE: You want these tests to be mutually exclusive. Each input on the command line can only match one type.
+  // As such, we want to ensure that we test the single-IP address case AFTER the start/stop ranges, as the last element of either of those could also match a single-ip address regex. 
+  // For example "sudo nmap 1.1.1.1-2.2.2.2" would match both for a range as "1.1.1.1-2.2.2.2" but also "2.2.2.2" as a single IP address. 
+  var testStartStop = new RegExp(/(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\-(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/);
+  var testNmapHyphenOrSingle = new RegExp(/(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\-(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]))?\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\-(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]))?$/);
+  var testCIDR = new RegExp(/(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\/([4-9]|(3[0-2]?)|(2[0-9]?)|(1[0-9]?)))+$/);
+  var testSingleIP = new RegExp(/^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/);
+  
+  // If the 'anything matched' regex returns a result, that means the last element still in the buffer that needs to be processed. Once all the address specifications are done, the last element will be part of the nmap command, such as flags or port specifications, and won't match. 
+  while (allAddresses != null)
+  {
+    //Check for start-stop address notation
+		if ( false ) // testStartStop.test(allAddresses[0]))  // NMAP DOES NOT ACTUALLY SUPPORT THIS. REMOVED.
+    {
+      // Each option will have a helpful console logging output option. If your nmap command isn't giving you the expected results, try uncommenting all of these to make sure it's being parsed as the correct type of address specification.
+    	// console.log("detected start-stop notation! " + allAddresses[0]);
+      let startAddress = allAddresses[0].split("-")[0];
+      let endAddress = allAddresses[0].split("-")[1];     
+      startAddress = ip2int(startAddress);
+      endAddress = ip2int(endAddress);
+      for (let i = startAddress; i <= endAddress; i++)
+      {
+      	addressList.push(int2ip(i));
+      }   
+    } else if ( testCIDR.test(allAddresses[0]))
+    { 
+      // if not start/stop, check for CIDR address notation
+      // console.log("detected CIDR notation! " + allAddresses[0]);
+      
+      let givenAddress = allAddresses[0].split("/")[0];
+      let cidrSize = allAddresses[0].split("/")[1];   
+      let startAddress = ip2int(givenAddress);
+      startAddress = startAddress & subnetMaskToNumber(cidrSize); 
+      var endAddress = Math.pow(2, 32-cidrSize) + startAddress -1;      
+      for (let i = startAddress; i <= endAddress; i++)
+      {
+      	addressList.push(int2ip(i));
+      }
+    } else if ( testSingleIP.test(allAddresses[0]))
+    { 
+      // if not start/stop, or CIRD notation, check for a single regular IP address. 
+    	// console.log("detected single IP notation! " + allAddresses[0]);      
+      addressList.push(allAddresses[0]);
+    } else if ( (testNmapHyphenOrSingle.test(allAddresses[0])) && (!testSingleIP.test(allAddresses[0])) )    
+		{ 
+      // If not start/stop, and not CIDR and not Single IP check for nmap hyphen notation (but check it isn't a single IP address)
+    	// console.log("detected nmap-hyphen notation! " + allAddresses[0]); 
+      let octA, octB, octC, octD; 
+      [octA, octB, octC, octD] = allAddresses[0].split(".");			
+
+      // This is dirty but understandable, so I'm leaving it for now.
+      // If those code goes to production, and readability/understanding the code isn't the primary concern, please for the love of god
+      // split these out so you're not changing data types in the same variable...
+      // Each octet variable is going to hold that octet's data. Initially it will either be a number or a range.
+      // Example: 1 or 1-255
+      // This will be parsed into a list, either of the full range, or the number.       
+      
+      if (octA.includes("-")) { octA = makeRange(octA.split("-")[0], Number(octA.split("-")[1]) +1 ) }
+      else {octA = [ Number(octA) ] }
+      
+      if (octB.includes("-")) { octB = makeRange(octB.split("-")[0], Number(octB.split("-")[1]) +1 ) }
+      else {octB = [ Number(octB) ] }
+      
+      if (octC.includes("-")) { octC = makeRange(octC.split("-")[0], Number(octC.split("-")[1]) +1 ) }
+      else {octC = [ Number(octC) ] }
+      
+      if (octD.includes("-")) { octD = makeRange(octD.split("-")[0], Number(octD.split("-")[1]) +1 ) }
+      else {octD = [ Number(octD) ] }
+      
+      // Iterate over all the combinations and add the addresses included to the list. 
+      for (let octetA of octA) 
+      {
+      	for (let octetB of octB)
+        {
+        	for (let octetC of octC)
+          {
+          	for (let octetD of octD)
+            {
+            	addressList.push(octetA +"."+ octetB +"."+ octetC +"."+ octetD);
+            }
+          }
+        }
+      }                      
+    }    
+		
+    // Now that we've dealt with that input, we should remove it and try to parse the command line again in case there were multiple groups of addresses provided.   	
+    // Note that we need to trim the whitespace again! 
+    commandString = commandString.replace(allAddresses[0], "").trim();
+    
+    // Try to parse the command again to see if there are more address groups to cover. This will be tested back at the top of the loop. 
+    allAddresses = commandString.match(testAnyMatch);
+  }
+  
+  // if there are no more address groups to cover, return the results. 
+  return addressList; 
+}
+
+
+// Compare IP address defintiions to see if they specify the same addresses. 
+// Since an actual element by element comparison // could be VERY long
+// running (for scanning the entire internet multiple times in a very poorly crafted specification)
+// We simply ensure both lists are sorted and don't include duplicates. Then if they start and end 
+/// with the same element and are the same length, they must be idential. 
+function compareIPAddresses (addressString1, addressString2) {
+  console.log("Address Strings: " + addressString1 + " and " + addressString2);
+  let templist = ListIPAddresses(addressString1).sort();
+  let fullist = ListIPAddresses(addressString2).sort();
+
+  console.log("tempFirst: " + templist[0] + "fullfirst: " + fullist[0]);
+  if (templist[0] != fullist[0]) { return false };
+  console.log("tempLast: " + templist[templist.length -1] + "fullLast: " + fullist[fullist.length -1]);
+  if (templist[templist.length -1] != fullist[fullist.length -1]) { return false };
+  console.log("tempLen: " + templist.length + "fulllength: " + fullist.length);
+  if (templist.length != fullist.length) { return false };
+
+  return true; 
+ 
+}
+
+
+
+
+
+// This will be the 'main' command which you will call. Returns a text buffer with nmap formatted output. 
+// data - A list of objects describing the entities visible to the scanner on the network in the format specified at the start of this file. 
+// commandString - the string the student used to invoke the nmap command. 
+function createPortScanResults(data, commandString) {
+  var result = "Starting Nmap 7.95 ( https:\/\/nmap.org )\r\n";
+  let scannedaddresses = 0;
+  var pingScan = commandString.includes(" -sn ") ||  commandString.includes(" -PE ");
+  var targetlist = ListIPAddresses(commandString);
+
+  // The two main things that are going to determine what your output looks like are the type of scan (ping scan or port scan) and the list of targets to scan. 
+  // if you're getting strange output, start by uncommenting these three lines to make sure the command is being parsed as you intended. 
+  // console.log("Ping scan? " + pingScan);
+  // console.log("Target List:);
+  console.log(targetlist);
+  
+  let totaladdresses = targetlist.length;
+  for (let machine in data) {
+    // Remember that we're not ACTUALLY scanning the network. It's far more efficient for us to iterate over the possible results and check if they were scanned for, then to actually check every scan target
+    // This is especially true for if a novice student decides to scan the entire internet with a 0.0.0.0/0 address scan. 
+    // Depending on the learning objectives of your tutor, you may want to provide feedback on scan efficiency, but that is out of scope for this implementation.
+    if (targetlist.includes(data[machine].IP) && ((data[machine].PortsClosed != "") || (data[machine].PortsFiltered != "") || (data[machine].PortsOpen != "") ) ) {
+      // We're only going to give output if the machine exists AND would be discoverable by nmap. There could very well be machines that are in the dataset but not responding to packets from the scanned location (for example, due to firewalls)
+      // Additionally, it would be good to add filtering here to check if the scan command included these ports, so we only display the asked-for ports. However, the current implementation would reject the student's input at the tutor level 
+      // if the correct ports were not included, so this is not needed in this version. 
+    	scannedaddresses += 1;
+    	result += "Nmap scan report for " + data[machine].IP +"\r\n";
+      result += "Host it up (" + data[machine].Latency + "s latency).\r\n";
+      if (!pingScan) { result += "PORT         STATE    SERVICE\r\n"; }
+      let allports = data[machine].PortsFiltered + " " + data[machine].PortsClosed + " " + data[machine].PortsOpen;
+      let sortedports = allports.split(" ").sort((a, b) => Number(a) - Number(b));       
+      for (let word in sortedports){
+      	if (sortedports[word] != "") {
+        	if (!pingScan) 
+          { 
+            result += sortedports[word] + "/tcp  ";
+            if(data[machine].PortsFiltered.includes(sortedports[word])) {
+              result += "filtered ";
+            } else if (data[machine].PortsOpen.includes(sortedports[word])) {
+              result += "open ";
+            } else if (data[machine].PortsClosed.includes(sortedports[word])) {
+              result += "closed ";
+            }        
+          	result += "\r\n";
+          }
+        }
+      }
+      if (!pingScan) { result += "\r\n"; }
+    }
+    
+  }
+  //total scan time is hardcoded, students did not appear to pay any attention to this metric, if needed/desired this can be modified in the future. 
+  result += "Nmap done: " + totaladdresses + " IP addresses (" + scannedaddresses + " host up) scanned in 26.18 seconds\r\n" ;
+  
+  return result;
+}
+
+function arrayRange(start, stop, increment) {
+  // Go through and replace this later. This is dumb. Also it ignores incremeent. This is because CTAT wouldn't let me use my array map trick. 
+  return makeRange(start, stop +1);
+}
+
+function checkPorts(flagString) {
+  
+  // Doesn't currently support split between parsing UDP and TCP scans, if this is needed, modify here! 
+  // If the port specification is incorrect it returns false. If no ports are specified, it returns an empty array. 
+  // If correctly specified, it returns an array of all the ports (as strings). 
+  if (flagString.substring(0,2) != "-p") { return false };
+  
+  let offset = 2; 
+  // Need to account for the fact that -pT is allowed just like -p in the current use case. 
+  if (flagString.substring(0,3) == "-pT") { offset = 3 };
+  
+
+  let portString = flagString.substring(offset).trim();
+  
+
+  
+  if (portString == "-") { return arrayRange(1,65535,1) };
+  
+  
+  let portScanList = portString.split(",");
+  
+  let resultList = [];
+  
+  for (let portSpec of portScanList)     
+    {
+      if (portSpec.includes("-"))
+      {  
+        let curRange = arrayRange(Number(portSpec.split("-")[0]), Number(portSpec.split("-")[1]), 1);
+     
+        for (let singlePort of curRange)
+          {
+
+            if (!resultList.includes(singlePort.toString())) 
+            { 
+
+              resultList.push(singlePort.toString());
+            }
+            else 
+            { 
+              //console.log("DUPE!"); 
+            }
+            
+          }
+      }
+      else
+      {         
+         if (!resultList.includes(portSpec)) { resultList.push(portSpec)};       
+      }
+    }
+  return resultList.sort();
+}
+
+function revealResults() {
+      let element2 = document.getElementById("secondPart");
+      element2.style.display = "block";      
+      let element9 = document.getElementById("correctOutput");
+      element9.style.display = "block";
+      
+      // Find the edges of the existing network map element. 
+      let networkElement = document.getElementById("network"); 
+      let networkElementBound = networkElement.getBoundingClientRect(); 
+      
+      // Position the new results below it, and make them move with the viewport. 
+      // Giving a 10 pixed padding between them. 
+      element9 = document.getElementById("correctOutput");      
+      /*element9.style.left = parseInt(networkElementBound.left) + "px"; 
+      element9.style.top = parseInt(networkElementBound.bottom) + "px"; */
+      // element9.style.position = "fixed";
+}
+
+//   ****** NAVIGATION HELP FOR NEW EDITORS ******
+//   Everything above this block is a helper function. These functions perform actions either in checking the data, 
+//   or manipulating the redered page, but they are not directly doing the grading/tracking of the tutor. 
+//   All tutor functions are below this block. 
+//   *********************************************
+
+
+//   ****** NAVIGATION HELP FOR NEW EDITORS ******
+//   The bootstrap rule initializes the tutor for the student. It sets up memory for us with initial information and gets us ready to take actions.
+//   *********************************************
+rule Bootstrap {
+	when {
+		bool : Boolean bool == false from false;
+	}
+	then {
+    console.log( leftAnswer.length);
+
+    // These set up memory with new textinput areas for each text input box in the html.
+    let cmd1 = assert(new TextInput("commandInput", ""));
+    let submitButton = assert(new InterfaceElement("submitFirstAttempt"));
+
+    let sudo = assert(new TextInput("sudoInput", ""));
+		let nmap = assert(new TextInput("nmapInput", ""));
+    let scantype = assert(new box("scanTypeInput", ""));
+    let scanFlag = assert(new TextInput("outputTypeInput", ""));
+		let port = assert(new TextInput("portInput", ""));
+		let ip = assert(new TextInput("ipInput", ""));    
+
+ 		let cmd2 = assert(new TextInput("commandInput2", ""));
+    
+		let l1 = assert(new TextInput("l1", ""));
+    let l2 = assert(new TextInput("l2", ""));
+    let l3 = assert(new TextInput("l3", ""));
+    let l4 = assert(new TextInput("l4", ""));
+    let r1 = assert(new TextInput("r1", ""));
+    let r2 = assert(new TextInput("r2", ""));
+    let r3 = assert(new TextInput("r3", ""));
+    let r4 = assert(new TextInput("r4", ""));
+       
+    for (var i = 0; i < rightAnswer.length; i++) {
+			assert(new pair(leftAnswer[i],rightAnswer[i]));
+		}
+
+    for (var i = 0; i < 4; i++) { // Changing this so that there is a row item for every row, regardless of answer length
+			assert(new row("l"+String(i+1), "r"+String(i+1), leftAnswer[i],rightAnswer[i]));
+		}
+
+    var p = new Problem(['l1','l2','l3','l4'],
+                        ['r1','r2','r3','r4'],
+                       leftAnswer, rightAnswer, fixLeft, oneColumn, 
+                        sudo.name, nmap.name, scantype.name,scanFlag.name,port.name,ip.name);
+    
+    
+    assert(p);
+    modify(p, "leftEntered", new Array(p.leftColumn.length).fill(""));
+    modify(p, "rightEntered", new Array(p.rightColumn.length).fill(""));
+    
+		assert(new TPA("problemStatementText", "UpdateTextArea", probtxt));
+    // assert(new TPA("introText", "UpdateTextArea", introtxt));
+    // if (introtxt.includes("Pre-test")){
+    //   title = `Pre-test ${title}`;
+    // } else {
+    //   title = `Post-test ${title}`;
+    // }
+    title = `Assessment ${title}`;
+		assert(new TPA("title_text", "UpdateTextArea", title));
+		assert(new TPA("outputQuestionText", "UpdateTextArea", opQuestion));
+		assert(new TPA("nmap_image", "setImage", imgAddress));
+    // let imageElement = document.getElementById("nmap_image");
+    // imageElement.src = imgAddress;
+		assert(new TPA("leftName", "UpdateTextArea", leftTitle));
+		assert(new TPA("rightName", "UpdateTextArea", rightTitle));
+
+    
+    
+    
+
+    
+    let element2 = document.getElementById("secondPart");
+    element2.style.display = "none";
+    let element9 = document.getElementById("correctOutput");
+    element9.style.display = "none";
+
+    let leftSideDataHolder = document.getElementById("izjb3");
+    leftSideDataHolder.style.minWidth = "150px";  
+    leftSideDataHolder.style.maxWidth = "300px";  
+    leftSideDataHolder.style.minHeight = "150px";  
+    leftSideDataHolder.style.order =  0;
+    //leftSideDataHolder.style.flexGrow = 2;
+
+    let rightSideDataHolder = document.getElementById("i8qmi");
+    rightSideDataHolder.style.flexGrow = 1;
+    rightSideDataHolder.style.order = 1;
+
+    //let networkDataHolder = document.getElementById("network");
+    //networkDataHolder.style.maxWidth = "200px";
+    //networkDataHolder.style.position = "fixed";   
+    //networkDataHolder.style.display = "flex";
+    let outputDataHolder = document.getElementById("correctOutput");
+    //outputDataHolder.style.maxWidth = "200px";
+    //outputDataHolder.style.position = "fixed"; 
+    
+        
+    // Set onclick events to handle display / close of map information. 
+    var dialog;    
+
+    dialog = $("<div>", {
+      id: "dialog-form",
+      title: "Network Map"
+    }).dialog({
+      autoOpen: false,
+      height: 400,
+      width: 675,
+      modal: true,    
+      close: function() { 
+      }
+    });
+    dialog.html("<p align='center' class='networkMapDialogBox'>You can move and resize this window</p><div id='networkMapImageHolder'></div>");
+    var elem = document.createElement("img");    
+    elem.setAttribute("class", "slide img-responsive");
+    elem.setAttribute("src", imgAddress);
+    document.getElementById("networkMapImageHolder").appendChild(elem);
+
+    let networkMapButton = document.getElementById("ctatdiv3");        
+    networkMapButton.addEventListener("click", function() {
+    // Code to execute when the element is clicked    
+    dialog.dialog( "option", "modal", false );
+    dialog.dialog("open");    
+    });   
+
+
+    
+    
+    // Set onclick events to handle display / close of output text. 
+    var scanResults;
+    scanResults = $("<div>", {
+      id: "scanResults-form",
+      title: "Result of Scan"
+    }).dialog({
+      autoOpen: false,
+      height: 400,
+      width: 550,
+      modal: true,    
+      close: function() { 
+      }
+    });
+    scanResults.html("<p align='center' class='scanResultDialogBox'>You can move and resize this window</p><div id='scanResultHolder'></div>");
+    
+    // The scan results don't exist yet, so we'll have to create it and assign the actual data once the scan is available. 
+    var elem = document.createElement("div");        
+    //elem.setAttribute("class", "slide img-responsive");
+    elem.setAttribute("id", "largerScanText");
+    elem.setAttribute("style", "white-space: pre-wrap; background-color: black; border-style: inset; border-color: black; background-image: radial-gradient( rgba(0, 60, 0, 0.75), black 100% ); margin: 0; padding: 2rem; color: white; font: 1.3rem Inconsolata, monospace; text-shadow: 0 0 1px #C8C8C8;"  );  
+    document.getElementById("scanResultHolder").appendChild(elem);
+    
+    // Can set the onclick for the results to output (the full text) or "text" (the div container). 
+    let scanResultButton = document.getElementById("output");        
+    scanResultButton.addEventListener("click", function() {
+      // Code to execute when the element is clicked    
+      // By now we should have the port scan results in scanResultSaver (otherwise how did they click on it?)    
+      scanResults.dialog( "option", "modal", false );
+      scanResults.dialog("open");    
+    });   
+		setProblemAttribute("use_backtracking", true);
+		setProblemAttribute("use_hint_fact", true);
+    setTracerLogFlags("conflict_tree", "fire", "sai_check", "backtrack", "modify");
+		halt();
+	}
+}
+
+
+rule enterFirstCommand {
+	when {
+		p: Problem {firstAttemptCorrect: f};
+
+		ie: TextInput ie.name == 'commandInput' && !ie.value { name: sel };
+
+    sai: StudentValues sai.selection == sel && sai.action == "UpdateTextField" {input: ipt};
+	}
+	then {
+    console.log("enterCommand rule fired with input:", ipt);
+    console.log("StudentValues:", sai);
+  
+
+    if (checkSAI({selection: sel, action: "UpdateTextField", input: -1}, 
+						function() {
+              // let x = 0;
+							    const answers = [scanAnswer, outputAnswer, pingAnswer];
+
+                  let s = ipt;
+                  let flag = true;
+
+                  let templist = ListIPAddresses("nmap " + ipAnswer[0]).sort();
+                  let fullist = ListIPAddresses(ipt).sort();
+
+                  if (templist[0] != fullist[0]) { return false };
+                  if (templist[templist.length -1] != fullist[fullist.length -1]) { return false };
+                  if (templist.length != fullist.length) { return false };
+                                   
+                  // Since we will be iteratively checking the last element in the input command, we need to check if it matches any of the formats. This regex should match all cases. It is anchored only at the END of the string, and will ignore the beginning - so you can pass in the entire nmap command, and it will ignore everything but the addresses.
+                  // NOTE! You'll want to make sure you're stripping any trailing whitespace characters (like a newline) from the command, if your tutor captures that input from the student hitting enter on the command. 
+                  var testAnyMatch = new RegExp(/(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\-(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$|(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\/([4-9]|(3[0-2]?)|(2[0-9]?)|(1[0-9]?)))?$|(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\-(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]))?\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\-(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]))?$/); 
+                  let allAddresses = s.match(testAnyMatch);  
+                  //console.log("All Address struct");
+                  //console.log(allAddresses);
+                  //console.log("s = " + s);
+                  // If the 'anything matched' regex returns a result, that means the last element still in the buffer that needs to be processed. Once all the address specifications are done, the last element will be part of the nmap command, such as flags or port specifications, and won't match. 
+                  while (allAddresses != null)
+                  {
+                    // Now that we've dealt with that input, we should remove it and try to parse the command line again in case there were multiple groups of addresses provided.   	
+                    // Note that we need to trim the whitespace again! 
+                    s = s.replace(allAddresses[0], "").trim();
+                    //console.log("+s = " + s);
+                    // Try to parse the command again to see if there are more address groups to cover. This will be tested back at the top of the loop. 
+                    allAddresses = s.match(testAnyMatch);
+                  }
+                  //console.log("sEND = " + s);
+                  let slist = s.split(' ');
+
+                  // checking if the first item is sudo and if so, removing it. 
+                  if (sudoAnswer.includes(slist[0])) {
+                      slist.shift(); // Remove the first element
+                  } else {
+                      return false;
+                  }
+
+                  // Checking if the (now) first item is the nmap command and if so removing it. 
+                  if (nmapAnswer.includes(slist[0])) {
+                      slist.shift(); // Remove the next element
+                  } else {
+                      return false;
+                  }
+                
+             
+                  for (let i of answers) {
+                      let flag = true;                      
+                      for (let j of i) {
+                          if (slist.includes(j)) {
+                              slist.splice(slist.indexOf(j), 1); // Remove the matched element
+                              flag = false;
+                              break;
+                          }
+                      }
+                      if (flag && !i.includes('')) {
+                          return false;
+                      }                      
+                  }
+
+                  // Checking for the correct port specification and if so, removing it.
+                  let portoffset = slist.indexOf("-p");
+                  let portSpecification;
+                  if (portoffset == -1 ) 
+                  { 
+                    portoffset = slist.indexOf("-pT"); 
+                  }              
+                  if ( portoffset != -1 )
+                  {
+                    portSpecification = slist[portoffset] + " " + slist[portoffset + 1];
+                  }
+
+                  if (portSpecification != null){
+                    templist = checkPorts(portSpecification); 
+  
+                    fullist = checkPorts(portsAnswer[0]); 
+  
+                    if (templist[0] != fullist[0]) { return false };
+                    if (templist[templist.length -1] != fullist[fullist.length -1]) { return false };
+                    if (templist.length != fullist.length) { return false };
+  
+                    slist.shift(); // The port list is acceptable, remove the -p or -pT item. 
+                    slist.shift(); // The port list is acceptable, remove the list of ports. 
+                  }
+                  return slist.length === 0;
+						})){
+      let x = 0;
+      console.log("Correct!");
+		}
+		else {
+      let x = 0;
+      // modify(ie, "value",ipt);
+      // modify(p, "firstAttemptCorrect", -1);
+      
+      // assert(new TPA("commandInput", "lock"));
+      // Make submit button go away after first attempt
+      // assert(new TPA("submitFirstAttempt", "SetVisible", "false"));
+      
+      
+		}
+    assert(new TPA("commandInput", "lock"));
+    modify(ie, "value", ipt);
+    assert(new TPA("submitFirstAttempt", "SetVisible", "false"));
+    revealResults();
+      
+      
+
+      if (p.fixLeft){
+            // temp = p.leftEntered;
+            for (var i = 0; i < leftAnswer.length; i++) {
+        			// assert(new TPA("l"+(i+1), "UpdateTextArea", leftAnswer[i]));
+              // assert(new TPA("l"+(i+1), "lock"));
+
+              const container = document.getElementById("l" + (i+1));
+              const input = container.querySelector("input");
+              
+              if (input) {
+                input.value = leftAnswer[i];  // already set in your case
+              
+                // Dispatch an "input" event so CTAT sees the change
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+              
+                // Optional: fire "change" if CTAT expects commit-on-blur
+                input.dispatchEvent(new Event("change", { bubbles: true }));
+                input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+
+                console.log("Simulated student entry.");
+              }
+              
+        		}
+            modify(p, "rightAnswerList", []);
+            // modify(p, "leftEntered", temp);
+        
+      }
+
+      if (p.oneColumn){
+        let element6 = document.getElementById("workstation");
+        element6.style.display = "none";
+
+      }
+
+    var finalAnswer = sudoAnswer[0] + " " +
+                  nmapAnswer[0] + " " +
+                  scanAnswer[0] + " " +
+                  portsAnswer[0] + " " +
+                  ipAnswer[0];
+      
+      scanResultSaver = createPortScanResults(exampledata, finalAnswer);
+      document.getElementById("largerScanText").innerHTML += "<br>" + scanResultSaver;
+      assert(new TPA("output",  "UpdateTextArea", scanResultSaver));
+		
+    halt();
+	}
+}
+
+// If you are entering an answer on the left hand side first (there is no matching value in the right hand side) this rule fires. 
+rule enterLeft {
+  when {
+    sai: StudentValues { selection: sel, input: i};
+    
+    ie: TextInput ie.name == sel { value: prev };
+
+    p: Problem p.oneColumn == false && p.leftColumn.includes(sel) { leftAnswerList: l, rightAnswerList: r };
+
+    ro: row ro.left == sel { right: sel2 };
+
+    ie2: TextInput ie2.name == sel2 && !ie2.value { name: sel2 };
+  }
+  then {
+    // grade silently (true if i is one of the allowed left answers)
+    if (checkSAI({ selection: sel, action: "UpdateTextField", input: -1 }, 
+             () => l.indexOf(i) !== -1 )) {
+      let x = 0;
+    } else {
+      let x = 0;
+    }
+
+    // commit the typed value to the textbox regardless of correctness (pretest style)
+    modify(ie, "value", i);
+    console.log("Changed ie value to: ", ie.value);
+
+    // put the value into leftEntered at the correct index for 'sel' (e.g., l2 -> index 1)
+    let idx = parseInt(sel.replace(/^\D+/, ""), 10) - 1; // strip non-digits, 1-based -> 0-based
+    if (isNaN(idx) || idx < 0) { idx = 0; }              // safety
+
+    let arr = Array.isArray(p.leftEntered) ? p.leftEntered.slice() : [];
+    // pad to the needed length
+    while (arr.length <= idx) arr.push("");
+
+    // set the slot
+    arr[idx] = i;
+    modify(p, "leftEntered", arr);
+
+    console.log("enterLeft set leftEntered[" + idx + "] =", i);
+    halt();
+  }
+}
+
+rule enterLeftFixed {
+  salience: 1;
+	when {
+    ie: TextInput !ie.value { name: sel };
+
+		p: Problem p.fixLeft == true && p.leftColumn.includes(sel) { leftAnswerList: l, rightAnswerList: r };
+
+    ro: row ro.left == sel {right: sel2};
+    
+    ie2: TextInput ie2.name == sel2 && !ie2.value {name: sel2};
+    
+    sai: StudentValues sai.selection == sel {input: i};
+	}
+	then {
+    
+		if (checkSAI({selection: sel, action: "UpdateTextField", input: -1}, 
+						function() {
+              console.log("In the function");
+                return (l.includes(i));       
+						})) {
+			modify(ie, "value", i);
+      temp = p.leftEntered;
+      temp.push(i); 
+      modify(p, "leftEntered", temp);
+      assert(new TPA(sel, "lock"));
+			halt();
+		}
+		else {
+			backtrack();
+		}
+	}
+}
+// // This is for problem type 3, specifically, because there only is 1 column. This rule covers that case to allow completion. 
+rule enterLeftOnecol {
+	when {
+    sai: StudentValues { selection: sel, input: i};
+    
+    ie: TextInput ie.name == sel { value: prev };
+
+    p: Problem oneColumn == true && p.leftColumn.includes(sel)&& (p.leftEntered.length != leftAnswer.length || p.rightEntered.length != rightAnswer.length){leftAnswerList: l, rightAnswerList:r};
+    
+	}
+	then {
+    
+		if (checkSAI({selection: sel, action: "UpdateTextField", input: -1}, 
+						function() {
+                return (l.includes(i));
+						})) {
+  		let x = 0; // pass
+		}
+		else {
+			let x = 0; // pass
+		}
+    modify(ie, "value", i);
+
+    // put the value into leftEntered at the correct index for 'sel' (e.g., l2 -> index 1)
+    let idx = parseInt(sel.replace(/^\D+/, ""), 10) - 1; // strip non-digits, 1-based -> 0-based
+    if (isNaN(idx) || idx < 0) { idx = 0; }              // safety
+
+    let arr = Array.isArray(p.leftEntered) ? p.leftEntered.slice() : [];
+    // pad to the needed length
+    while (arr.length <= idx) arr.push("");
+
+    // set the slot
+    arr[idx] = i;
+    modify(p, "leftEntered", arr);
+
+    console.log("enterLeft set leftEntered[" + idx + "] =", i);
+    halt();
+	}
+}
+
+// // This rule is for when you enter something on the left side, but there is already input in the matching right side box. 
+rule enterLeftSec {
+	when {
+    sai: StudentValues { selection: sel, input: i};
+    
+    ie: TextInput ie.name == sel { value: prev };
+
+    p: Problem p.oneColumn == false && p.leftColumn.includes(sel) { leftAnswerList: l, rightAnswerList: r };
+
+    ro: row ro.left == sel { right: sel2 };
+
+    ie2: TextInput ie2.name == sel2 && ie2.value {value: v};
+    
+    pr: pair pr.right == v {left: ans};
+    
+	}
+	then {   
+    // Try to find a matching pair for the right-side value
+  //   let left_ans = null;
+  //   for (let fact of facts) {
+  //     if (fact.constructor.name === "pair" && fact.right === v) {
+  //       left_ans = fact.left;
+  //       break;
+  //     }
+  //   }
+
+  //   // If correct pair exists, check against it
+  //   let isCorrect = (left_ans !== null && i === left_ans);
+		// if (checkSAI({selection: sel, action: "UpdateTextField", input: -1},
+  //                () => isCorrect)) {
+  //     modify(ie, "value", i);
+  //     let entered = [...p.leftEntered, i];
+  //     modify(p, "leftEntered", entered);
+  //   } else {
+  //     // This path now runs even if there's no pair (incorrect input)
+  //     // You can give feedback, allow retry, etc.
+  //     let x = 0; // placeholder
+  //   }
+    if (checkSAI({selection: sel, action: "UpdateTextField", input: -1}, 
+						function() {
+                return (i.includes(ans));
+         
+						})) {
+
+      console.log(leftAnswer);
+      
+		}
+		else {
+			let x = 0;
+		}
+    modify(ie, "value", i);
+
+    // put the value into leftEntered at the correct index for 'sel' (e.g., l2 -> index 1)
+    let idx = parseInt(sel.replace(/^\D+/, ""), 10) - 1; // strip non-digits, 1-based -> 0-based
+    if (isNaN(idx) || idx < 0) { idx = 0; }              // safety
+
+    let arr = Array.isArray(p.leftEntered) ? p.leftEntered.slice() : [];
+    // pad to the needed length
+    while (arr.length <= idx) arr.push("");
+
+    // set the slot
+    arr[idx] = i;
+    modify(p, "leftEntered", arr);
+
+    console.log("enterLeft set leftEntered[" + idx + "] =", i);
+    halt();
+
+    // assert(new TPA(sel, "lock"));
+    halt();
+	}
+}
+
+// // This rule is for when you enter something in the right side, and there is nothing on the matching slot on the left. 
+rule enterRight {
+	when {
+    sai: StudentValues { selection: sel, input: i};
+    
+    ie: TextInput ie.name == sel { value: prev };
+
+    p: Problem p.rightColumn.includes(sel){rightAnswerList: r, leftAnswerList:l}; // deleting length checks of answer list
+
+    ro: row ro.right == sel {left: sel2};
+    
+    ie2: TextInput ie2.name == sel2 && !ie2.value {name: sel2};
+    
+	}
+	then {
+  
+    if (checkSAI({selection: sel, action: "UpdateTextField", input: -1}, 
+						() => r.indexOf(i) !== -1 )) {
+		}
+		else {
+			let x = 0;
+		}
+    
+    modify(ie, "value", i);
+
+    // put the value into leftEntered at the correct index for 'sel' (e.g., l2 -> index 1)
+    let idx = parseInt(sel.replace(/^\D+/, ""), 10) - 1; // strip non-digits, 1-based -> 0-based
+    if (isNaN(idx) || idx < 0) { idx = 0; }              // safety
+
+    let arr = Array.isArray(p.rightEntered) ? p.rightEntered.slice() : [];
+    // pad to the needed length
+    while (arr.length <= idx) arr.push("");
+
+    // set the slot
+    arr[idx] = i;
+    modify(p, "rightEntered", arr);
+
+    console.log("enterRight set rightEntered[" + idx + "] =", i);
+    halt();
+	}
+}
+
+// //This rule is for when you enter something on the right side but there is a matching left side entry already. 
+rule enterRightSec {
+	when {
+    sai: StudentValues { selection: sel, input: i};
+    
+    ie: TextInput ie.name == sel { value: prev };
+
+    p: Problem p.rightColumn.includes(sel){rightAnswerList: r, leftAnswerList:l}; // deleting length checks of answer list
+
+    ro: row ro.right == sel {left: sel2};
+        
+    ie2: TextInput ie2.name == sel2 && ie2.value {value: v};
+    
+    pr: pair pr.left == v {right: ans};
+    
+	}
+	then {
+
+    if (checkSAI({selection: sel, action: "UpdateTextField", input: -1}, 
+						() => i.includes(ans))) {
+      let x = 0; 
+    } else {
+      let x = 0; // placeholder
+    }
+    modify(ie, "value", i);
+
+    // put the value into leftEntered at the correct index for 'sel' (e.g., l2 -> index 1)
+    let idx = parseInt(sel.replace(/^\D+/, ""), 10) - 1; // strip non-digits, 1-based -> 0-based
+    if (isNaN(idx) || idx < 0) { idx = 0; }              // safety
+
+    let arr = Array.isArray(p.rightEntered) ? p.rightEntered.slice() : [];
+    // pad to the needed length
+    while (arr.length <= idx) arr.push("");
+
+    // set the slot
+    arr[idx] = i;
+    modify(p, "rightEntered", arr);
+
+    console.log("enterRight set rightEntered[" + idx + "] =", i);
+    halt();
+	}
+}
+
+// rule done {
+//     when {
+//         b: Boolean b === true from true;
+//     }
+//     then {
+//         if (checkSAI({selection: "done", action: "ButtonPressed", input: "don't_care"})) {
+//             halt();
+//         } else {
+//             backtrack();
+//         }
+//     }
+// }
+// function for adding additional logging
+rule gradeAllOnDoneVariableCount {
+  when {
+    sai: StudentValues sai.selection == "done";
+
+    p: Problem { pairsByLeft: byLeft, oneColumn: oc, leftAnswerList: la };
+
+    l1: TextInput l1.name == "l1" { value: vL1 };
+    r1: TextInput r1.name == "r1" { value: vR1 };
+
+    l2: TextInput l2.name == "l2" { value: vL2 };
+    r2: TextInput r2.name == "r2" { value: vR2 };
+
+    l3: TextInput l3.name == "l3" { value: vL3 };
+    r3: TextInput r3.name == "r3" { value: vR3 };
+
+    l4: TextInput l4.name == "l4" { value: vL4 };
+    r4: TextInput r4.name == "r4" { value: vR4 };
+  }
+  then {
+    // console.log("ByLeft", byLeft);
+    const expectedCount = la.length; // number of correct pairs in this item
+    const usedLeft  = {};
+    const usedRight = {};
+
+    let ok = true;
+    let correctCount = 0;
+
+    function processRow(vL, vR) {
+      // console.log("Checking: ", vL, vR);
+      if (!ok) return;                 // short-circuit after a failure
+      const leftFilled  = !!vL;
+      const rightFilled = !!vR;
+
+      if (!leftFilled && (oc || !rightFilled)) {
+        return; // empty row -> ignore
+      }
+      // console.log("MADE IT PAST FIRST CHECK");
+      if (!leftFilled || (!rightFilled && !oc)) {
+        ok = false; // incomplete pair
+        return;
+      }
+      // console.log("MADE IT PAST Second CHECK");
+      if (!oc && byLeft[vL] === undefined) {
+        ok = false; // left not in canonical set
+        return;
+      }
+      // console.log("MADE IT PAST Third CHECK");
+      if (!oc && byLeft[vL] !== vR) {
+        ok = false; // wrong mapping
+        return;
+      }
+      // console.log("MADE IT PAST Fourth CHECK");
+      if (usedLeft[vL] || usedRight[vR]) {
+        ok = false; // duplicate use
+        return;
+      }
+      // console.log("WE MADE IT");
+      usedLeft[vL]  = true;
+      if (vR){
+        usedRight[vR] = true;
+      }
+      correctCount++;
+    }
+
+    // Check up to 4 rows
+    // console.log("Expected Count: ", expectedCount);
+    processRow(vL1, vR1);
+    // console.log("Correct Count 1: ", correctCount);
+    processRow(vL2, vR2);
+    // console.log("Correct Count 2: ", correctCount);
+    processRow(vL3, vR3);
+    // console.log("Correct Count 3: ", correctCount);
+    processRow(vL4, vR4);
+    // console.log("Correct Count 4: ", correctCount);
+
+    // Must have exactly the expected number of correct pairs
+    // console.log("Ok before check: ", ok, "Correct count: ", correctCount, "expected count: ", expectedCount);
+    if (ok && correctCount !== expectedCount) {
+      ok = false;
+    }
+    var loggingLibrary = CTATCommShell.commShell.getLoggingLibrary();
+    loggingLibrary.logInterfaceAttempt("all_ok", "",ok);
+    console.log("All: ", ok);
+    if (checkSAI({ selection: "done", action: "ButtonPressed", input: "don't_care" })) {
+      halt();
+    } else {
+      backtrack();
+    }
+    
+  }
+}

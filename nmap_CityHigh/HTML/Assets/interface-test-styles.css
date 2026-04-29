@@ -1,0 +1,510 @@
+body {
+  font-family: 'Open Sans', 'Segoe UI', Tahoma, sans-serif;
+  // font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#i3cky {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    flex-wrap: wrap;
+}
+
+#i7nex {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-right: 10px;
+    max-width: 68px;
+}
+
+#ip85r {
+    margin-right: 10px;
+}
+
+#network {
+    justify-content: center;
+    align-content: center;
+    font-weight: 200;
+    font-size: 20px;
+}
+
+#icsp {
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+}
+
+#statement {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    padding: 10px 10px 40px 10px;
+  // font-weight: bold;
+  font-size: 20px;
+}
+
+
+#correct {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+}
+
+
+#sudo {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    padding: 10px 0px 10px 0px;
+}
+
+#i7xsq {
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    padding: 10px 0px 10px 0px;
+}
+
+#portopt {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    padding: 10px 0px 10px 0px;
+}
+
+#ixd0u {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    padding: 10px 0px 10px 0px;
+}
+
+#i254i {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    flex-direction: row;
+    padding: 10px 0px 10px 0px;
+}
+
+#correctOutput {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+}
+
+#outputQuestion, #outputQuestionNote {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    flex-direction: row;
+    min-height: 0;
+    height: auto;
+}
+
+#ipWorkstation {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+}
+
+#ip {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    margin: 0px 20px 0px 20px;
+}
+
+#workstation {
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    margin: 0px 20px 0px 20px;
+}
+
+#commandInput {
+    padding: 10px 50px 10px 50px;
+    width: 100%;
+}
+
+#sudoInput {
+    width: 300px;
+    padding: 0px 50px 0px 50px;
+}
+
+#nmapInput {
+    width: 300px;
+    padding: 0px 50px 0px 50px;
+}
+
+#portInput {
+    width: 300px;
+    padding: 0px 50px 0px 50px;
+}
+
+#ipInput {
+    width: 300px;
+    padding: 0px 50px 0px 50px;
+}
+
+#commandInput2 {
+    padding: 0px 50px 0px 50px;
+    width: 600px;
+}
+
+#l1 {
+    margin: 5px 0px 5px 0px;
+}
+
+#rightName {
+    text-align: center;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#leftName {
+    text-align: center;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#r1 {
+    margin: 5px 0px 5px 0px;
+}
+
+#r2 {
+    margin: 0 0px 5px 0px;
+}
+
+#r4 {
+    padding: 0 0 5px 0;
+}
+
+#r3 {
+    margin: 0 0 5px 0;
+}
+
+#l2 {
+    margin: 0 0 5px 0;
+}
+
+#l3 {
+    padding: 0 0 5px 0;
+}
+
+#l4 {
+    margin: 0 0 5px 0;
+}
+
+#cheatSheet {
+    height: 22px;
+    font-weight: 600;
+    font-size: 20px;
+}
+
+#itkhz {
+    text-align: center;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#iwcse {
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
+
+#statementIntroText {
+  align-self: flex-start;     /* this one child aligns left */
+  /* optionally ensure it spans the width: */
+  /* align-self: stretch; */
+  /* and left-align text if a parent has text-align:center: */
+  text-align: left;
+  padding: 0px 100px 0px 100px;
+}
+#problemStatementText {
+    line-height: normal;
+    // font-weight: 200;
+    font-size: 20px;
+    padding: 0px 100px 0px 100px;
+}
+
+#title_text {
+    font-weight: 800;
+    font-size: 30px;
+}
+
+#introText {
+  font-size: 18px;
+  line-height: normal;
+  background: yellow;
+}
+
+#wrongMessageText {
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#itsf3 {
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#i3chb {
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#io0y8 {
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#ieyg4 {
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#i554j {
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#i8qwh {
+    font-weight: 700;
+    font-size: 20px;
+}
+
+#outputQuestionText {
+    font-weight: 600;
+    font-size: 20px;
+}
+
+#outputQuestionNoteText {
+    font-weight: 600;
+    font-size: 20px;
+}
+
+#output {
+    font-weight: 700;
+    font-size: min(0.5vw, 12px);
+    white-space: pre;
+    background-color: black;
+    border-style: inset;
+    border-color: black;
+    background-image: radial-gradient(
+      rgba(0, 60, 0, 0.75), black 100%
+    );
+    margin: 0;
+    padding: 2rem;
+    color: white;
+    font: 1.3rem Inconsolata, monospace;
+    text-shadow: 0 0 1px #C8C8C8;
+}
+
+#scanType {
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0px 10px 0px;
+}
+
+#outputType {
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0px 10px 0px;
+}
+
+#outputTypeInput {
+    padding: 0px 50px 0px 50px;
+    width: 300px;
+}
+
+#itt1wd {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+#ibxeic {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+#nmap_image {
+    width: 100%;
+    height: 100%;
+    min-height: 160px;
+}
+
+#i3tcd {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+#i8udv {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+#porttext {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+#igkxb {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+#scanTypeInput {
+    padding: 0px 50px 0px 50px;
+    width: 300px;
+    justify-content: center;
+    font-weight: 400;
+    text-align: center;
+    align-content: center;
+    align-items: center;
+}
+
+#izjb3 {
+    width: 100%;
+    padding: 0px 25px 0px 25px;
+}
+
+#i8qmi {
+    padding: 0px 25px 0px 25px;
+    min-width: 0px;
+    overflow: hidden;
+}
+
+.figure {
+    width: 100%;
+    height: 100%;
+    max-height: 300px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
+    overflow: visible;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+}
+
+.figure img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 10;
+}
+
+.text {
+    width: 100%;
+    max-height: 225px;
+    transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
+    overflow: hidden;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    z-index: 10;
+}
+
+.text img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#done {
+    position: fixed !important;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    /* Optional: Add some styling to make it more prominent */
+    min-width: 80px;
+    min-height: 40px;
+}
+
+/* Optional: Style the container sections to not interfere */
+#i042e {
+    position: static;
+}
+
+#i3cky {
+    position: static;
+}
+
+#pretest-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modal Content Box */
+#pretest-modal {
+  background-color: white;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  text-align: center;
+}
+
+#pretest-modal h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+#pretest-modal p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #555;
+  margin: 20px 0;
+  text-align: left;
+}
+
+#pretest-modal-ok-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+#pretest-modal-ok-btn:hover {
+  background-color: #45a049;
+}
+
+.slide {
+    width: 100%;
+}
+
+.ui-dialog {
+    margin: 0;
+}
+
+.ui-dialog .ui-dialog-content {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}

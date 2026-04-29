@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="https://cdn.ctat.cs.cmu.edu/releases/lab/CTAT.css">
+        <link rel="stylesheet" href="https://cdn.ctat.cs.cmu.edu/releases/lab/html-editor-default.css">
+        <link rel="stylesheet" href="./Assets/interface(2)-styles.css">
+        <link rel="stylesheet" href="https://cdn.ctat.cs.cmu.edu/releases/lab/guppy/guppy-default-osk.min.css">
+        <script src="https://cdn.ctat.cs.cmu.edu/releases/lab/guppy/guppy.min.js"></script>
+        <script src="https://cdn.ctat.cs.cmu.edu/releases/lab/guppy/guppy_osk.js"></script>
+        <script type="text/javascript" src="https://cdn.ctat.cs.cmu.edu/releases/lab/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdn.ctat.cs.cmu.edu/releases/lab/nools.js"></script>
+        <script type="text/javascript" src="https://cdn.ctat.cs.cmu.edu/releases/lab/ctat.min.js"></script>
+        <script type="text/javascript" src="https://cdn.ctat.cs.cmu.edu/releases/lab/ctatloader.js"></script>
+        <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/start/jquery-ui.css">
+      <link rel="stylesheet" href="https://cdn.ctat.cs.cmu.edu/releases/lab/guppy/guppy-default-osk.min.css"></head>
+  
+      <body>
+        <div id="Outer" title="Outer" class="flexcolumn">
+   <section id="icsp" title="" class="flexrow">
+      <div id="title_text" class="CTATTextField">
+         Title                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+      </div>
+</section>
+<section id="statement" title="statment" class="flexrow">
+   <div id="problemStatmentText" class="CTATTextField">
+      Problem Statement                                                                                                                                                                                                                                       
+   </div>
+   <div id="cheatSheet" class="CTATTextField">
+      <a href="https://linux.die.net/man/1/nmap" target="_blank">nmap man page (documentation)</a>
+   </div>
+</section>
+<section id="i85gn" class="flexrow">
+   <div id="izjb3" class="flexcolumn">
+      <section id="network" title="" class="flexcolumn">
+         Use this network map to help you complete your tasks: (click to expand)<br>
+         <div class="figure">
+            <div id="nmap_image" data-ctat-img="Assets/nmap.png" data-ctat-label="" data-ctat-enabled="true" data-ctat-show-feedback="false" class="CTATButton" data-ctat-tutor="false"></div>
+</div>
+</section>
+<section id="correctOutput" title="correctOutput" class="flexrow">
+   <div id="i8qwh" class="CTATTextField">
+      Here is the output you got from the command: (click to expand)                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+   </div>
+   <div class="text">
+     <div id="output" class="CTATTextField">
+        OutPut                                                                                                                                                                                                                                                                                                                                       
+     </div>
+   </div>
+</section>
+</div>
+<div id="i8qmi" class="flexcolumn">
+   <div id="iwcse" class="flexcolumn">
+      <div id="itkhz" class="CTATTextField">
+         Enter the shell command you would use to complete this task:                                                                                                                                                                                                                                                           
+      </div>
+      <div id="commandInput" class="CTATTextInput" data-ctat-tutor="false"></div>
+      <div id="submitFirstAttempt" class="CTATSubmitButton" data-ctat-target="commandInput" data-ctat-show-feedback="false" >Submit</div>
+      </div>
+<section id="wrong" title="wrong" class="flexrow CTATElement">
+   <div id="ijfrl" class="flexcolumn">
+      <section id="wrontMessage" title="" class="flexrow">
+         <div id="wrongMessageText" title="wrongMesstext" class="CTATTextField">
+            That doesn't look quite right. Lets try building the command together.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+         </div>
+</section>
+<section id="sudo" title="" class="flexrow">
+   <div id="i3tcd" class="CTATTextField">
+      Elevated privileges are required to ensure a complete scan. How do you elevate privileges for a command?                                                                                                                       
+   </div>
+   <div id="sudoInput" class="CTATTextInput"></div>
+</section>
+<section id="i7xsq" title="" class="flexrow">
+   <div id="i8udv" class="CTATTextField">
+      What is the command to run nmap?                                                                                                                     
+   </div>
+   <div id="nmapInput" class="CTATTextInput"></div>
+</section>
+<section id="scanType" title="" class="flexrow">
+   <div id="itt1wd" class="CTATTextField">
+      What scanning technique would this scan use?                                                                                                                                        
+   </div>
+   <div id="scanTypeInput" data-ctat-labels=",Port Scan,Ping Scan" class="CTATComboBox"></div>
+</section>
+<section id="outputType" title="" class="flexrow">
+   <div id="ibxeic" class="CTATTextField">
+      What flag specifies the use of this scanning technique?    
+   </div>
+   <div id="outputTypeInput" class="CTATTextInput"></div>
+</section>
+<section title="" id="portopt" class="flexrow">
+   <div id="porttext" class="CTATTextField">
+      In order to specify the ports to scan, what flag would you use and what parameter(s) would follow the flag?                                                                                                                     
+   </div>
+   <div id="portInput" class="CTATTextInput"></div>
+</section>
+<section id="ixd0u" title="" class="flexrow">
+   <div id="igkxb" class="CTATTextField">
+      How would you specify the IP address range that you need to scan?                                                                                                                     
+   </div>
+   <div id="ipInput" class="CTATTextInput"></div>
+</section>
+<section id="i254i" title="ip" class="flexrow">
+   <div id="i554j" class="CTATTextField">
+      Now lets put it all together and try the shell command again:                                                                                                                                                                                                                                
+   </div>
+   <div id="commandInput2" class="CTATTextInput"></div>
+</section>
+</div>
+</section>
+<section id="correct" title="correct" class="flexrow CTATElement">
+   <div id="ifr94" class="flexcolumn">
+      <section id="ouputQuestion" title="" class="flexrow">
+         <div id="ouputQuestionText" class="CTATTextField">
+            Output Question                                                                                                                                                                                                                                                                                 
+         </div>
+</section>
+<section id="ipWorkstation" title="ipWorkstation" class="flexrow">
+   <div id="ip" title="ip" class="flexcolumn">
+      <div id="leftName" class="CTATTextField">
+         IP Address                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+      </div>
+   <div id="l1" class="CTATTextInput"></div>
+   <div id="l2" class="CTATTextInput"></div>
+   <div id="l3" class="CTATTextInput"></div>
+   <div id="l4" class="CTATTextInput"></div>
+</div>
+   <div id="workstation" title="workstation" class="flexcolumn">
+      <div id="rightName" class="CTATTextField">
+         Workstation number                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+      </div>
+   <div id="r1" class="CTATTextInput"></div>
+   <div id="r2" class="CTATTextInput"></div>
+   <div id="r3" class="CTATTextInput"></div>
+   <div id="r4" class="CTATTextInput"></div>
+</div>
+</section>
+</div>
+</section>
+</div>
+</section>
+<section id="i042e" title="submit" class="flexrow">
+   <section id="i3cky" class="HintWidgetRow">
+      <div id="i7nex" class="HintWidgetButtons">
+         <div class="CTATHintButton"></div>
+      <div id="done" class="CTATDoneButton"></div>
+</div>
+      <div id="ip85r" class="CTATHintWindow"></div>
+      <div class="CTATSkillWindow"></div>
+</section>
+</section>
+</div>
+  <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
+  <script>
+  const attachZoomToCTATPopup = () => {
+    const observer = new MutationObserver(() => {
+      const modalImage = document.querySelector("#networkMapImageHolder img");
+      if (modalImage && !modalImage.dataset.zoomInitialized) {
+        modalImage.dataset.zoomInitialized = "true";
+        const instructionText = document.querySelector(".networkMapDialogBox");
+        if (instructionText) {
+          instructionText.innerText = "You can zoom and drag the map. Use the 🔍 buttons to zoom in/out, and click to drag the image.";
+        }
+
+        const panzoom = Panzoom(modalImage, {
+          maxScale: 3,
+          minScale: 1,
+          contain: 'outside',
+        });
+
+        modalImage.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+        // Optional: Add a zoom cursor for better UX
+        modalImage.style.cursor = 'zoom-in';
+        modalImage.addEventListener('mousedown', () => {
+          modalImage.style.cursor = 'grab';
+        });
+        modalImage.addEventListener('mouseup', () => {
+          modalImage.style.cursor = 'zoom-in';
+        });
+
+        // --- Create Zoom Buttons ---
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.position = 'absolute';
+        buttonContainer.style.top = '10px';
+        buttonContainer.style.right = '10px';
+        buttonContainer.style.zIndex = '999';
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.flexDirection = 'column';
+        buttonContainer.style.gap = '5px';
+      
+        const zoomInBtn = document.createElement('button');
+        zoomInBtn.innerText = '🔍+';
+        zoomInBtn.style.padding = '5px';
+        zoomInBtn.style.fontSize = '18px';
+        zoomInBtn.style.borderRadius = '5px';
+      
+        const zoomOutBtn = document.createElement('button');
+        zoomOutBtn.innerText = '🔍−';
+        zoomOutBtn.style.padding = '5px';
+        zoomOutBtn.style.fontSize = '18px';
+        zoomOutBtn.style.borderRadius = '5px';
+      
+        zoomInBtn.addEventListener('click', () => panzoom.zoomIn());
+        zoomOutBtn.addEventListener('click', () => panzoom.zoomOut());
+      
+        buttonContainer.appendChild(zoomInBtn);
+        buttonContainer.appendChild(zoomOutBtn);
+      
+        modalImage.parentElement.style.position = 'relative'; // ensure it's positioned
+        modalImage.parentElement.appendChild(buttonContainer);
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  };
+
+  window.addEventListener('load', attachZoomToCTATPopup);
+
+  
+</script>
+
+      </body>
+    </html>
+  

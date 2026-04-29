@@ -1,0 +1,27 @@
+import("productionRules-final.nools");
+import("SkillDefinitions.nools");
+
+global probType = "Unresponsive Workstations";
+global fixLeft = false;
+global oneColumn = false;
+global probtxt = "Due to a bad update from a vendor, some of our systems are stuck in a boot loop and have become unresponsive.  <br><strong>Scan the corporate network using a single nmap command and identify any systems that are affected</strong> so that technicans can be dispatched to roll back the update manually. The firewalls are configured to allow ICMP echo requests through.";
+global title = "Tutor: NMAP problem 4";
+global opQuestion = "Based on the output, list any unresponsive workstation IPs below:";
+global leftTitle = "IP Address";
+global rightTitle = "Workstation Name";
+global imgAddress = "Assets/UnresponsiveWorkstations_2.png";
+
+global sudoAnswer = ["sudo"];
+global nmapAnswer = ["nmap"];
+global scanAnswer = ["-sn", "-PE", ""];
+global portsAnswer = [""];
+global pRangeAnswer = [""];
+global pFlagAnswer = [""];
+global outputAnswer = ["-oN", ""];
+global pingAnswer = [""];
+global ipAnswer = ["172.27.107.0/24 172.27.108.0/24"];
+
+global leftAnswer = ["172.27.107.56", "172.27.107.55", "172.27.108.84"];
+global rightAnswer = ["Digital Signage", "Kiosk Computer", "User Workstation 2"];
+
+global exampledata = [{IP: "128.237.3.102", Latency: "0.04", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "172.27.107.1", Latency: "0.097", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "172.27.107.3", Latency: "0.096", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "172.27.107.5", Latency: "0.096", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "172.27.107.20", Latency: "0.034", PortsClosed: "", PortsFiltered: "", PortsOpen: "80 443"}, {IP: "172.27.107.21", Latency: "0.088", PortsClosed: "", PortsFiltered: "", PortsOpen: "25 465 587 2525"}, {IP: "172.27.107.22", Latency: "0.071", PortsClosed: "", PortsFiltered: "", PortsOpen: "53"}, {IP: "172.27.107.57", Latency: "0.092", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "172.27.108.1", Latency: "0.097", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "172.27.108.3", Latency: "0.067", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "172.27.108.5", Latency: "0.067", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "172.27.108.20", Latency: "0.049", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 88 135 139 389 443 445 464"}, {IP: "172.27.108.21", Latency: "0.08", PortsClosed: "", PortsFiltered: "", PortsOpen: "445"}, {IP: "172.27.108.22", Latency: "0.031", PortsClosed: "", PortsFiltered: "", PortsOpen: "515 9100"}, {IP: "172.27.108.83", Latency: "0.027", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}];

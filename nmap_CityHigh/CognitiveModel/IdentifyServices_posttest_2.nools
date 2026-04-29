@@ -1,0 +1,26 @@
+import("productionRules-test.nools");
+
+global probType = "Identify Services";
+global fixLeft = true;
+global oneColumn = false;
+global probtxt = "The services section of our networks should contain a print server providing printing services (LPD on TCP port 515 and JetDirect on TCP port 9100), a mail server providing SMTP over TCP ports 25, 465, 587 and 2525, a file server providing SMB file sharing over TCP port 445, and a web server hosting both secure and insecure web connections (HTTP on TCP port 80 and HTTPS on TCP port 443). All other services are prohibited on this network segment. Using nmap, identify which server is configured at which IP address. <strong>Scan only the services portions the office network and DMZ, with one nmap command.</strong>";
+global title = "Problem 1";
+global opQuestion = "Based on the output, which server is which service?";
+global leftTitle = "Server";
+global rightTitle = "IP Address";
+global imgAddress = "Assets/IdentifyServices_posttest_2.png";
+
+global introtxt = "Post-test: This quiz aims to assess our course content, NOT you personally. There's NO need to worry about getting questions wrong. <strong>If you encounter unfamiliar or challenging questions, please enter 'I don't know' instead of guessing the answer</strong>. Your honest response is invaluable to us as we refine the course.  Click the 'Done' button when you are finished with all of the questions.";
+global sudoAnswer = ["sudo"];
+global nmapAnswer = ["nmap"];
+global scanAnswer = ["-sS", "-sT", ""];
+global pFlagAnswer = ["-p", "-pT"];
+global outputAnswer = ["-oN", ""];
+global pingAnswer = ["-Pn", ""];
+global portsAnswer = ["-p 445,25,465,587,2525,515,9100"];
+global ipAnswer = ["10.241.246.0/27 10.241.247.0/27"];
+
+global leftAnswer = ["File Server", "Mail Server", "Print Server"];
+global rightAnswer = ["10.241.246.20", "10.241.246.22", "10.241.246.21"];
+
+global exampledata = [{IP: "10.241.246.1", Latency: "0.025", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "10.241.246.3", Latency: "0.044", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "10.241.246.5", Latency: "0.044", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "10.241.246.20", Latency: "0.072", PortsClosed: "", PortsFiltered: "", PortsOpen: "80 443"}, {IP: "10.241.246.21", Latency: "0.087", PortsClosed: "", PortsFiltered: "", PortsOpen: "25 465 587 2525"}, {IP: "10.241.246.22", Latency: "0.078", PortsClosed: "", PortsFiltered: "", PortsOpen: "53"}, {IP: "10.241.246.65", Latency: "0.029", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "10.241.246.66", Latency: "0.038", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "10.241.247.1", Latency: "0.025", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "10.241.247.3", Latency: "0.031", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "10.241.247.5", Latency: "0.031", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "10.241.247.20", Latency: "0.078", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 88 135 139 389 443 445 464"}, {IP: "10.241.247.21", Latency: "0.083", PortsClosed: "", PortsFiltered: "", PortsOpen: "445"}, {IP: "10.241.247.22", Latency: "0.048", PortsClosed: "", PortsFiltered: "", PortsOpen: "515 9100"}, {IP: "10.241.247.82", Latency: "0.051", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "10.241.247.83", Latency: "0.067", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "10.241.247.84", Latency: "0.064", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "128.237.3.102", Latency: "0.053", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}];

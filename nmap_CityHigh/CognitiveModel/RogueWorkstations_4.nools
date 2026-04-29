@@ -1,0 +1,27 @@
+import("productionRules-final.nools");
+import("SkillDefinitions.nools");
+
+global probType = "Rogue Workstations";
+global fixLeft = false;
+global oneColumn = true;
+global probtxt = "Scan both the office network and the entire DMZ with one nmap command. Identify any unaccounted for machines on our corporate networks. The firewalls are configured to allow ICMP echo requests through.";
+global title = "Tutor: Rogue Workstations 4";
+global opQuestion = "Based on the output, list any rogue workstation IPs below:";
+global leftTitle = "IP Address";
+global rightTitle = "";
+global imgAddress = "Assets/RogueWorkstations_4.png";
+
+global sudoAnswer = ["sudo"];
+global nmapAnswer = ["nmap"];
+global scanAnswer = ["-sn", "-PE", ""];
+global portsAnswer = [""];
+global pRangeAnswer = [""];
+global pFlagAnswer = [""];
+global outputAnswer = ["-oN", ""];
+global pingAnswer = [""];
+global ipAnswer = ["192.168.0.0/16 192.169.0.0/16 192.170.0.0/16 192.171.0.0/16"];
+
+global leftAnswer = ["192.171.0.25", "192.170.0.25", "192.169.0.93"];
+global rightAnswer = [];
+
+global exampledata = [{IP: "128.237.3.102", Latency: "0.059", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.168.0.1", Latency: "0.094", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.168.0.3", Latency: "0.063", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "192.168.0.5", Latency: "0.063", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "192.168.0.20", Latency: "0.05", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.168.0.21", Latency: "0.033", PortsClosed: "", PortsFiltered: "", PortsOpen: "25 465 587 2525"}, {IP: "192.168.0.22", Latency: "0.086", PortsClosed: "", PortsFiltered: "", PortsOpen: "53"}, {IP: "192.168.0.59", Latency: "0.072", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.168.0.60", Latency: "0.015", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.169.0.1", Latency: "0.094", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.169.0.3", Latency: "0.036", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "192.169.0.5", Latency: "0.036", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "192.169.0.20", Latency: "0.013", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 88 135 139 389 443 445 464"}, {IP: "192.169.0.21", Latency: "0.035", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.169.0.22", Latency: "0.04", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.169.0.90", Latency: "0.013", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.169.0.91", Latency: "0.048", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.169.0.93", Latency: "0.079", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.170.0.1", Latency: "0.094", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.170.0.3", Latency: "0.079", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "192.170.0.5", Latency: "0.079", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "192.170.0.20", Latency: "0.09", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.170.0.21", Latency: "0.038", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.170.0.22", Latency: "0.041", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.170.0.25", Latency: "0.088", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.170.0.54", Latency: "0.015", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.170.0.55", Latency: "0.083", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.171.0.1", Latency: "0.094", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.171.0.3", Latency: "0.018", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "192.171.0.5", Latency: "0.018", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "192.171.0.20", Latency: "0.043", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.171.0.21", Latency: "0.017", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.171.0.22", Latency: "0.072", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "192.171.0.25", Latency: "0.071", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.171.0.71", Latency: "0.036", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.171.0.72", Latency: "0.029", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "192.171.0.73", Latency: "0.048", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}];

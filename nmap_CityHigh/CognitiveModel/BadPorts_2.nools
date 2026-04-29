@@ -1,0 +1,26 @@
+import("productionRules-final.nools");
+import("SkillDefinitions.nools");
+
+global probType = "Bad Ports";
+global fixLeft = false;
+global oneColumn = false;
+global probtxt = "We have received a DMCA complaint that someone is sharing copyrighted material from our corporate network via bittorrent. <br><strong>Conduct a scan with nmap to find out which workstation is responsible.</strong> ( Bittorrent is known to use TCP ports in the range <strong>6881 - 6889</strong> )";
+global title = "Tutor: NMAP problem 8";
+global opQuestion = "Based on the output, which workstations are responsible?";
+global leftTitle = "IP Address";
+global rightTitle = "Workstation Number";
+global imgAddress = "Assets/BadPorts_2.png";
+
+global sudoAnswer = ["sudo"];
+global nmapAnswer = ["nmap"];
+global scanAnswer = ["-sS", "-sT", ""];
+global pFlagAnswer = ["-p", "-pT"];
+global outputAnswer = ["-oN", ""];
+global pingAnswer = ["-Pn", ""];
+global portsAnswer = ["-p 6881-6889"];
+global ipAnswer = ["172.18.0.0/16 172.19.0.0/16"];
+
+global leftAnswer = ["172.19.0.77", "172.18.0.76", "172.19.0.78"];
+global rightAnswer = ["5", "2", "6"];
+
+global exampledata = [{IP: "128.237.3.102", Latency: "0.055", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "172.18.0.1", Latency: "0.07", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "172.18.0.3", Latency: "0.049", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "172.18.0.5", Latency: "0.049", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "172.18.0.10", Latency: "0.022", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 88 135 139 389 443 445 464"}, {IP: "172.18.0.75", Latency: "0.095", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "172.18.0.76", Latency: "0.01", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445 6889"}, {IP: "172.18.0.77", Latency: "0.015", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "172.19.0.1", Latency: "0.07", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 443"}, {IP: "172.19.0.3", Latency: "0.012", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "172.19.0.5", Latency: "0.012", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 123 389 443"}, {IP: "172.19.0.10", Latency: "0.075", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 88 135 139 389 443 445 464"}, {IP: "172.19.0.76", Latency: "0.045", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445"}, {IP: "172.19.0.77", Latency: "0.09", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445 6888"}, {IP: "172.19.0.78", Latency: "0.064", PortsClosed: "", PortsFiltered: "", PortsOpen: "22 53 80 139 443 445 6886"}];

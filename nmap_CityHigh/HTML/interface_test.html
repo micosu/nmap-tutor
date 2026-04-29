@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="https://cdn.ctat.cs.cmu.edu/releases/lab/CTAT.css">
+        <link rel="stylesheet" href="https://cdn.ctat.cs.cmu.edu/releases/lab/html-editor-default.css">
+        <link rel="stylesheet" href="./Assets/interface-test-styles.css">
+        <link rel="stylesheet" href="https://cdn.ctat.cs.cmu.edu/releases/lab/guppy/guppy-default-osk.min.css">
+        <script src="https://cdn.ctat.cs.cmu.edu/releases/lab/guppy/guppy.min.js"></script>
+        <script src="https://cdn.ctat.cs.cmu.edu/releases/lab/guppy/guppy_osk.js"></script>
+        <script type="text/javascript" src="https://cdn.ctat.cs.cmu.edu/releases/lab/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdn.ctat.cs.cmu.edu/releases/lab/nools.js"></script>
+        <script type="text/javascript" src="https://cdn.ctat.cs.cmu.edu/releases/lab/ctat.min.js"></script>
+        <script type="text/javascript" src="https://cdn.ctat.cs.cmu.edu/releases/lab/ctatloader.js"></script>
+        <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/start/jquery-ui.css">
+        <link rel="stylesheet" href="https://cdn.ctat.cs.cmu.edu/releases/lab/guppy/guppy-default-osk.min.css">
+      </head>
+  
+      <body>
+        <!-- Test Modal Popup -->
+        <div id="pretest-modal-overlay">
+          <div id="pretest-modal">
+            <h2>Instructions</h2>
+            <p>
+              This quiz aims to assess our course content, NOT you personally. There's NO need to worry about getting questions wrong. 
+              <strong>If you encounter unfamiliar or challenging questions, please enter 'I don't know' instead of guessing the answer</strong>. 
+              Your honest response is invaluable to us as we refine the course. Click the 'Done' button when you are finished with all of the questions.
+            </p>
+            <button id="pretest-modal-ok-btn">OK</button>
+          </div>
+        </div>
+
+        <div id="Outer" title="Outer" class="flexcolumn">
+   <section id="icsp" title="" class="flexrow">
+      <div id="title_text" class="CTATTextField">
+         Title                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+      </div>
+</section>
+<!--<section id="intro" title="intro" class="flexrow">
+       <div id="introText" class="CTATTextField">
+          Introduction                                                                                                                                                                                                                                      
+       </div>
+    </section>-->
+<section id="statement" title="statement" class="flexrow">
+  <div id="statementIntroText" class="CTATTextField">
+          <strong>Problem Statement:</strong>                                                                                                                                                                                                                                    
+       </div>
+   <div id="problemStatementText" class="CTATTextField">
+      Problem Statement                                                                                                                                                                                                                                       
+   </div>
+  <div id="cheatSheet" class="CTATTextField">
+      <a href="https://man7.org/linux/man-pages/man1/nmap.1.html" target="_blank">nmap man page (documentation)</a>
+   </div>
+</section>
+<section id="i85gn" class="flexrow">
+   <div id="izjb3" class="flexcolumn">
+      <section id="network" title="" class="flexcolumn">
+         Use this network map to help you complete your tasks: (click to expand)<br><br>
+         <div class="figure">
+            <div id="nmap_image" data-ctat-img="Assets/nmap.png" data-ctat-label="" data-ctat-enabled="true" data-ctat-show-feedback="false" class="CTATButton" data-ctat-tutor="false"></div>
+</div>
+</section>
+<section id="correctOutput" title="correctOutput" class="flexrow">
+   <div id="i8qwh" class="CTATTextField">
+      Here is the output you got from the command: (click to expand)                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+   </div>
+   <div class="text">
+     <div id="output" class="CTATTextField">
+        OutPut                                                                                                                                                                                                                                                                                                                                       
+     </div>
+   </div>
+</section>
+</div>
+<div id="i8qmi" class="flexcolumn">
+   <div id="iwcse" class="flexcolumn">
+      <div id="itkhz" class="CTATTextField">
+         Enter the shell command you would use to complete this task:                                                                                                                                                                                                                                                           
+      </div>
+      <div id="commandInput" class="CTATTextInput" data-ctat-tutor="false"></div>
+      <div id="submitFirstAttempt" class="CTATSubmitButton" data-ctat-target="commandInput" data-ctat-show-feedback="false" >Submit</div>
+      </div>
+<section id="secondPart" title="secondPart" class="flexrow CTATElement">
+   <div id="ifr94" class="flexcolumn">
+      <section id="outputQuestion" title="" class="flexrow">
+         <div id="outputQuestionText" class="CTATTextField">
+            Output Question                                                                                                                                                                                                                                                                                 
+         </div>
+      </section>
+      <section id="outputQuestionNote" title="" class="flexrow">
+         <div id="outputQuestionNoteText" class="CTATTextField">
+            (Note: There may be up to four answers. Leave any additional text boxes blank)                                                                                                                                                                                                                                                                               
+         </div>
+      </section>
+<section id="ipWorkstation" title="ipWorkstation" class="flexrow">
+   <div id="ip" title="ip" class="flexcolumn">
+      <div id="leftName" class="CTATTextField">
+         IP Address                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+      </div>
+   <div id="l1" class="CTATTextInput"></div>
+   <div id="l2" class="CTATTextInput"></div>
+   <div id="l3" class="CTATTextInput"></div>
+   <div id="l4" class="CTATTextInput"></div>
+</div>
+   <div id="workstation" title="workstation" class="flexcolumn">
+      <div id="rightName" class="CTATTextField">
+         Workstation number                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+      </div>
+   <div id="r1" class="CTATTextInput"></div>
+   <div id="r2" class="CTATTextInput"></div>
+   <div id="r3" class="CTATTextInput"></div>
+   <div id="r4" class="CTATTextInput"></div>
+</div>
+</section>
+</div>
+</section>
+</div>
+</section>
+<section id="i042e" title="submit" class="flexrow">
+   <section id="i3cky" class="DoneRow">
+      <div id="done" class="CTATDoneButton"></div>
+</section>
+</section>
+
+  <script>
+    // Close modal when OK button is clicked
+    document.getElementById('pretest-modal-ok-btn').addEventListener('click', function() {
+      document.getElementById('pretest-modal-overlay').style.display = 'none';
+    });
+  </script>
+
+  <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
+  <script>
+  const attachZoomToCTATPopup = () => {
+    const observer = new MutationObserver(() => {
+      const modalImage = document.querySelector("#networkMapImageHolder img");
+      if (modalImage && !modalImage.dataset.zoomInitialized) {
+        modalImage.dataset.zoomInitialized = "true";
+        const instructionText = document.querySelector(".networkMapDialogBox");
+        if (instructionText) {
+          instructionText.innerText = "You can zoom and drag the map. Use the 🔍 buttons to zoom in/out, and click to drag the image.";
+        }
+
+        const panzoom = Panzoom(modalImage, {
+          maxScale: 3,
+          minScale: 1,
+          contain: 'outside',
+        });
+
+        modalImage.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+        // Optional: Add a zoom cursor for better UX
+        modalImage.style.cursor = 'zoom-in';
+        modalImage.addEventListener('mousedown', () => {
+          modalImage.style.cursor = 'grab';
+        });
+        modalImage.addEventListener('mouseup', () => {
+          modalImage.style.cursor = 'zoom-in';
+        });
+
+        // --- Create Zoom Buttons ---
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.position = 'absolute';
+        buttonContainer.style.top = '10px';
+        buttonContainer.style.right = '10px';
+        buttonContainer.style.zIndex = '999';
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.flexDirection = 'column';
+        buttonContainer.style.gap = '5px';
+      
+        const zoomInBtn = document.createElement('button');
+        zoomInBtn.innerText = '🔍+';
+        zoomInBtn.style.padding = '5px';
+        zoomInBtn.style.fontSize = '18px';
+        zoomInBtn.style.borderRadius = '5px';
+      
+        const zoomOutBtn = document.createElement('button');
+        zoomOutBtn.innerText = '🔍−';
+        zoomOutBtn.style.padding = '5px';
+        zoomOutBtn.style.fontSize = '18px';
+        zoomOutBtn.style.borderRadius = '5px';
+      
+        zoomInBtn.addEventListener('click', () => panzoom.zoomIn());
+        zoomOutBtn.addEventListener('click', () => panzoom.zoomOut());
+      
+        buttonContainer.appendChild(zoomInBtn);
+        buttonContainer.appendChild(zoomOutBtn);
+      
+        modalImage.parentElement.style.position = 'relative'; // ensure it's positioned
+        modalImage.parentElement.appendChild(buttonContainer);
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  };
+
+  window.addEventListener('load', attachZoomToCTATPopup);
+
+  
+</script>
+
+<script>
+  document.addEventListener(
+    "tutorInitialized",
+    e => {
+      CTATCommShell.commShell.addGlobalEventListener({
+        processCommShellEvent: function(e, m) {
+          if(/InterfaceAction/i.test(e) && !/Hide/i.test(CTAT.ToolTutor.tutor.getFeedbackPolicy())) {
+            CTAT.ToolTutor.tutor.setFeedbackSuppressed(CTATMsgType.HIDE_ALL_FEEDBACK);
+          }
+        }
+      })
+    }
+  )
+</script>
+
+  <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
+  <script>
+  const attachZoomToCTATPopup = () => {
+    const observer = new MutationObserver(() => {
+      const modalImage = document.querySelector("#networkMapImageHolder img");
+      if (modalImage && !modalImage.dataset.zoomInitialized) {
+        modalImage.dataset.zoomInitialized = "true";
+        const instructionText = document.querySelector(".networkMapDialogBox");
+        if (instructionText) {
+          instructionText.innerText = "You can zoom and drag the map. Use the 🔍 buttons to zoom in/out, and click to drag the image.";
+        }
+
+        const panzoom = Panzoom(modalImage, {
+          maxScale: 3,
+          minScale: 1,
+          contain: 'outside',
+        });
+
+        modalImage.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+        // Optional: Add a zoom cursor for better UX
+        modalImage.style.cursor = 'zoom-in';
+        modalImage.addEventListener('mousedown', () => {
+          modalImage.style.cursor = 'grab';
+        });
+        modalImage.addEventListener('mouseup', () => {
+          modalImage.style.cursor = 'zoom-in';
+        });
+
+        // --- Create Zoom Buttons ---
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.position = 'absolute';
+        buttonContainer.style.top = '10px';
+        buttonContainer.style.right = '10px';
+        buttonContainer.style.zIndex = '999';
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.flexDirection = 'column';
+        buttonContainer.style.gap = '5px';
+      
+        const zoomInBtn = document.createElement('button');
+        zoomInBtn.innerText = '🔍+';
+        zoomInBtn.style.padding = '5px';
+        zoomInBtn.style.fontSize = '18px';
+        zoomInBtn.style.borderRadius = '5px';
+      
+        const zoomOutBtn = document.createElement('button');
+        zoomOutBtn.innerText = '🔍−';
+        zoomOutBtn.style.padding = '5px';
+        zoomOutBtn.style.fontSize = '18px';
+        zoomOutBtn.style.borderRadius = '5px';
+      
+        zoomInBtn.addEventListener('click', () => panzoom.zoomIn());
+        zoomOutBtn.addEventListener('click', () => panzoom.zoomOut());
+      
+        buttonContainer.appendChild(zoomInBtn);
+        buttonContainer.appendChild(zoomOutBtn);
+      
+        modalImage.parentElement.style.position = 'relative'; // ensure it's positioned
+        modalImage.parentElement.appendChild(buttonContainer);
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  };
+
+  window.addEventListener('load', attachZoomToCTATPopup);
+
+  
+</script>
+
+
+      </body>
+    </html>
