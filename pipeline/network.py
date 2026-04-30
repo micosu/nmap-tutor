@@ -651,7 +651,7 @@ if __name__ == "__main__":
         {'type': 'device', 'name': 'UserLocation', 'device_type': 'User', 'display_name': 'You are connected here'},
         {'type': 'device', 'name': 'Firewall1', 'device_type': 'Firewall'},
         {'type': 'cluster', 'name': 'switch', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'Switch', 'device_type': 'Switch'}]},
-        {'type': 'cluster', 'name': 'Office', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'DomainController', 'device_type': 'Controller', 'ip': ip_offset(20), 'display_name': 'Domain Controller'}], 'ip': base_ip + num_addresses},
+        {'type': 'cluster', 'name': 'Office', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'DomainController', 'device_type': 'Controller', 'ip': ip_offset(20), 'display_name': 'Domain Controller'}], 'ip': base_ip + prefix_length},
         {'type': 'cluster', 'name': 'ClusterWorkstation1', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation1', 'device_type': 'Server', 'ip': ip_offset(100), 'display_name': 'Server'}]},
         {'type': 'cluster', 'name': 'ClusterWorkstation2', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation2', 'device_type': 'Printer', 'ip': ip_offset(101), 'display_name': 'User Workstation'}]},
         {'type': 'cluster', 'name': 'ClusterWorkstation3', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation3', 'device_type': 'Camera', 'ip': ip_offset(102), 'display_name': 'Camera'}]},
