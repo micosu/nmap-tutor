@@ -634,8 +634,8 @@ class Network:
 if __name__ == "__main__":
     # Generate example network (1 subnet)
     network = Network("TrialNetwork")
-    base_ip = '192.16.0.0'
-    num_addresses = '/24'
+    base_ip = '192.168.0.0'
+    prefix_length = '/24'
 
     base_parts = base_ip.split('.')
     base_prefix = '.'.join(base_parts[:-1])
@@ -666,4 +666,4 @@ if __name__ == "__main__":
     })
 
     # Change file name here
-    network.generate_map("subnet_posttest")
+    network.generate_map("network_map")

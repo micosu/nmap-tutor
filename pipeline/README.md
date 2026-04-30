@@ -56,6 +56,6 @@ The following parameters are optional:
 
 ## Key Files
 
-- network.py: The code used to generate the network maps
+- network.py: The code used to generate the network maps. If you want to quickly generate just a single network map with one subnet, edit the "base_ip" and "prefix_length" variables and change the file name (if desired). Then you can run the file and a map will be generated and stored locally
 - problem.py: The code that contains information on the different problem types ("Bad Ports", "Identify Services", etc)
 - auto_generate.py: Relies on code from network.py and problem.py to implement a full pipeline, starting with information on the problem type and number of subnets provided to the arg parser when you run the files.
