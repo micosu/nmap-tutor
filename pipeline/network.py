@@ -632,8 +632,17 @@ class Network:
 
 
 if __name__ == "__main__":
-    # Generate example network
+    # Generate example network (1 subnet)
     network = Network("TrialNetwork")
+    base_ip = '192.16.0.0'
+    num_addresses = '/24'
+
+    base_parts = base_ip.split('.')
+    base_prefix = '.'.join(base_parts[:-1])
+    base_last = int(base_parts[-1])
+
+    def ip_offset(offset):
+        return f"{base_prefix}.{base_last + offset}"
 
     # Change IP addresses of individual devices here
     devices = network.add_items_from_config([
@@ -642,18 +651,18 @@ if __name__ == "__main__":
         {'type': 'device', 'name': 'UserLocation', 'device_type': 'User', 'display_name': 'You are connected here'},
         {'type': 'device', 'name': 'Firewall1', 'device_type': 'Firewall'},
         {'type': 'cluster', 'name': 'switch', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'Switch', 'device_type': 'Switch'}]},
-        {'type': 'cluster', 'name': 'Office', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'DomainController', 'device_type': 'Controller', 'ip': '192.16.0.20', 'display_name': 'Domain Controller'}], 'ip': '192.16.0.0/24'},
-        {'type': 'cluster', 'name': 'ClusterWorkstation1', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation1', 'device_type': 'Server', 'ip': '192.16.0.100', 'display_name': 'Server'}]},
-        {'type': 'cluster', 'name': 'ClusterWorkstation2', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation2', 'device_type': 'Printer', 'ip': '192.16.0.101', 'display_name': 'User Workstation'}]},
-        {'type': 'cluster', 'name': 'ClusterWorkstation3', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation3', 'device_type': 'Camera', 'ip': '192.16.0.102', 'display_name': 'Camera'}]},
+        {'type': 'cluster', 'name': 'Office', 'cluster_type': 'intermediate', 'nodes': [{'type': 'device', 'name': 'DomainController', 'device_type': 'Controller', 'ip': ip_offset(20), 'display_name': 'Domain Controller'}], 'ip': base_ip + num_addresses},
+        {'type': 'cluster', 'name': 'ClusterWorkstation1', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation1', 'device_type': 'Server', 'ip': ip_offset(100), 'display_name': 'Server'}]},
+        {'type': 'cluster', 'name': 'ClusterWorkstation2', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation2', 'device_type': 'Printer', 'ip': ip_offset(101), 'display_name': 'User Workstation'}]},
+        {'type': 'cluster', 'name': 'ClusterWorkstation3', 'cluster_type': 'endpoint', 'nodes': [{'type': 'device', 'name': 'Workstation3', 'device_type': 'Camera', 'ip': ip_offset(102), 'display_name': 'Camera'}]},
     ])
 
     # Change IP addresses of individual edges here
     network.connect_items_from_config({
         "Internet": [("BorderRouter", "child", (' 128.237.3.102 ',""))],
-        "BorderRouter": [("Firewall1", "child", ("  192.16.0.1  ", "  192.16.0.2  "))],
-        "Firewall1": [("switch", "same", ("  192.16.0.3  ", ""))],
-        "switch": [("UserLocation", "same", ("", "  192.16.0.5  ")), ("Office", "above"), ("ClusterWorkstation1",), ("ClusterWorkstation2",), ("ClusterWorkstation3",)]
+        "BorderRouter": [("Firewall1", "child", (f"  {ip_offset(1)}  ", f"  {ip_offset(2)}  "))],
+        "Firewall1": [("switch", "same", (f"  {ip_offset(3)}  ", ""))],
+        "switch": [("UserLocation", "same", ("", f"  {ip_offset(5)}  ")), ("Office", "above"), ("ClusterWorkstation1",), ("ClusterWorkstation2",), ("ClusterWorkstation3",)]
     })
 
     # Change file name here
